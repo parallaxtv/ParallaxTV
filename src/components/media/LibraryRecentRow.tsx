@@ -3,12 +3,13 @@ import { getItemsApi } from "@jellyfin/sdk/lib/utils/api/items-api";
 import { SortOrder } from "@jellyfin/sdk/lib/generated-client/models";
 import { MediaRow } from "./MediaRow";
 import { createJellyfinApi } from "../../lib/jellyfinApi";
+import { AuthData } from "../../types/auth";
 
 // Fetches each library and renders a "New in <LibraryName>" row per library.
 // Libraries with no recent additions are silently skipped.
 
 interface LibraryRecentRowsProps {
-  authData: any;
+  authData: AuthData; // CHANGE THIS
   // How many days counts as "recent". Default 60.
   recentDays?: number;
 }

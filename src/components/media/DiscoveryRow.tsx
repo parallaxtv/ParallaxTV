@@ -3,17 +3,13 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { getItemsApi } from "@jellyfin/sdk/lib/utils/api/items-api";
 import { createJellyfinApi } from "../../lib/jellyfinApi";
+import { AuthData } from "../../types/auth";
+import { MediaItem } from "../../types/media";
+import { DiscoveryItem, DiscoveryDetail, DiscoveryCast } from "../../types/discovery";
+import { fetchDiscoveryItems, fetchDiscoveryDetails, normTitle } from "../../services/discovery/discoveryService";
 
 const SAFE_PLACEHOLDER =
   "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%3Crect%20fill%3D%22%232a2a2a%22%20width%3D%22100%25%22%20height%3D%22100%25%22%2F%3E%3C%2Fsvg%3E";
-
-// ─── Single source of truth for your Worker URL ───────────────────────────────
-const API = "https://parallax-api.parallaxtv-api.workers.dev";
-
-function normTitle(t: string) {
-  if (!t) return "";
-  return t.toLowerCase().replace(/^(the |a |an )/i,"").replace(/[^a-z0-9\s]/g,"").replace(/\s+/g," ").trim();
-}
 
 // ─── Score Badge ──────────────────────────────────────────────────────────────
 function ScoreBadge({ score }: { score?: number }) {
@@ -27,7 +23,7 @@ function ScoreBadge({ score }: { score?: number }) {
 }
 
 // ─── Cast Strip (modal) ───────────────────────────────────────────────────────
-function CastStrip({ cast }: { cast: any[] }) {
+function CastStrip({ cast }: { cast: DiscoveryCast[] }) {
   if (!cast?.length) return null;
   return (
     <div>
@@ -36,7 +32,7 @@ function CastStrip({ cast }: { cast: any[] }) {
         Cast
       </p>
       <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
-        {cast.map((c: any, i: number) => (
+        {cast.map((c, i) => (
           <div key={i} className="flex-shrink-0 w-[84px] flex flex-col items-center text-center">
             <div className="relative w-14 h-14 mb-2">
               <img
@@ -69,18 +65,18 @@ export function DiscoveryRow({
 }: {
   type: "anime" | "kdrama" | "movies" | "seasonal";
   title: string;
-  authData: any;
+  authData: AuthData;
 }) {
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const [items, setItems] = useState<any[]>([]);
-  const [libraryDict, setLibraryDict] = useState<any[]>([]);
+  const [items, setItems] = useState<DiscoveryItem[]>([]);
+  const [libraryDict, setLibraryDict] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<any>(null);
-  const [detailData, setDetailData] = useState<any>(null);
+  const [selected, setSelected] = useState<DiscoveryItem | null>(null);
+  const [detailData, setDetailData] = useState<DiscoveryDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [trailerKey, setTrailerKey]         = useState<string | null>(null);
+  const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [fullscreenTrailer, setFullscreenTrailer] = useState(false);
 
   // Close fullscreen trailer on Escape key
@@ -90,6 +86,7 @@ export function DiscoveryRow({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [fullscreenTrailer]);
+
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
 
@@ -98,10 +95,8 @@ export function DiscoveryRow({
     if (!authData) return;
     async function fetchLib() {
       try {
-        // --- NEW CODE START ---
         const baseApi = createJellyfinApi(authData.serverUrl, authData.token);
         const api = getItemsApi(baseApi);
-        // --- NEW CODE END ---
 
         const res = await api.getItems({
           userId: authData.userId,
@@ -109,7 +104,7 @@ export function DiscoveryRow({
           includeItemTypes: ["Movie", "Series"],
           fields: ["ProductionYear", "OriginalTitle"] as any,
         });
-        setLibraryDict(res.data.Items || []);
+        setLibraryDict((res.data.Items as MediaItem[]) || []);
       } catch (err) {
         console.error("DiscoveryRow: library fetch failed", err);
       }
@@ -117,39 +112,38 @@ export function DiscoveryRow({
     fetchLib();
   }, [authData]);
 
-  // ── Fetch from Worker ─────────────────────────────────────────────────────
+  // ── Fetch from Service ─────────────────────────────────────────────────────
   useEffect(() => {
     async function loadData() {
-      try {
-        const endpoint =
-          type === "anime"     ? `${API}/api/anime`          :
-          type === "seasonal"  ? `${API}/api/anime/seasonal` :
-          type === "kdrama"    ? `${API}/api/kdrama`         :
-                                 `${API}/api/movies`;
-
-        const res  = await fetch(endpoint);
-        const data = await res.json();
-
-        if (!data.success) return;
-
-        if (type === "anime" || type === "seasonal") {
-          // Worker already returns the right shape
-          setItems(data.data);
-        } else {
-          // movies + kdrama — ensure cast is empty array for modal consistency
-          setItems(data.data.map((item: any) => ({ ...item, cast: [] })));
-        }
-      } catch (err) {
-        console.error("DiscoveryRow: data fetch failed", err);
-      } finally {
-        setLoading(false);
-      }
+      const data = await fetchDiscoveryItems(type);
+      setItems(data);
+      setLoading(false);
     }
     loadData();
   }, [type]);
 
+  // ── Fetch full detail when modal opens ───────────────────────────────────
+  useEffect(() => {
+    setTrailerKey(null);
+    setFullscreenTrailer(false);
+    if (!selected) { 
+      setDetailData(null); 
+      return; 
+    }
+
+    setDetailLoading(true);
+    setDetailData(null);
+
+    fetchDiscoveryDetails(type, selected).then(({ detail, trailerKey }) => {
+      if (detail) setDetailData(detail);
+      if (trailerKey) setTrailerKey(trailerKey);
+    }).finally(() => {
+      setDetailLoading(false);
+    });
+  }, [selected?.id, selected, type]);
+
   // ── Library match ─────────────────────────────────────────────────────────
-  const getLibraryMatch = (item: any) => {
+  const getLibraryMatch = (item: DiscoveryItem) => {
     const n1 = normTitle(item.title);
     const n2 = normTitle(item.altTitle || "");
     return libraryDict.find((lib) => {
@@ -162,62 +156,6 @@ export function DiscoveryRow({
     });
   };
 
-  // ── Fetch full detail when modal opens ───────────────────────────────────
-  // Reset trailer state whenever selected changes
-  useEffect(() => {
-    setTrailerKey(null);
-    setFullscreenTrailer(false);
-  }, [selected?.id]);
-
-  useEffect(() => {
-    if (!selected) { setDetailData(null); return; }
-
-    setDetailLoading(true);
-    setDetailData(null);
-
-    if (type === "anime" || type === "seasonal") {
-      // Anime: trailerUrl is now in search results via mapJikanAnime (trailerUrl field).
-      // Try it directly first — if missing fall back to a full /api/anime/:id fetch.
-      const directUrl = selected.trailerUrl ?? null;
-      if (directUrl) {
-        const ytMatch = directUrl.match(/(?:v=|youtu\.be\/)([^&?/]+)/);
-        if (ytMatch) setTrailerKey(ytMatch[1]);
-        setDetailLoading(false);
-        return;
-      }
-      // Fallback: full detail fetch by MAL ID
-      const malId = selected.malId ?? selected.id;
-      fetch(`${API}/api/anime/${malId}`)
-        .then(r => r.json())
-        .then(data => {
-          if (data.success && data.data?.trailerUrl) {
-            const ytMatch = data.data.trailerUrl.match(/(?:v=|youtu\.be\/)([^&?/]+)/);
-            if (ytMatch) setTrailerKey(ytMatch[1]);
-          }
-        })
-        .catch(() => {})
-        .finally(() => setDetailLoading(false));
-      return;
-    }
-
-    // Movies / K-drama: fetch full detail from TMDB via worker
-    const endpoint = type === "movies"
-      ? `${API}/api/movies/${selected.id}`
-      : `${API}/api/kdrama/${selected.id}`;
-
-    fetch(endpoint)
-      .then(r => r.json())
-      .then(data => {
-        if (data.success) {
-          setDetailData(data.data);
-          const ytUrl = data.data?.trailer?.youtubeUrl ?? "";
-          const ytMatch = ytUrl.match(/(?:v=|youtu\.be\/)([^&?/]+)/);
-          if (ytMatch) setTrailerKey(ytMatch[1]);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setDetailLoading(false));
-  }, [selected?.id]);
   const scroll = (dir: "left" | "right") => {
     scrollRef.current?.scrollBy({ left: dir === "left" ? -(175 * 4) : 175 * 4, behavior: "smooth" });
   };
@@ -503,13 +441,13 @@ export function DiscoveryRow({
                       ))}
                     </div>
                   </div>
-                ) : detailData?.cast?.length > 0 ? (
+                ) : detailData?.cast && detailData.cast.length > 0 ? (
                   <div>
                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
                       <span className="w-3 h-px bg-red-600 inline-block" />Cast
                     </p>
                     <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
-                      {detailData.cast.map((c: any, i: number) => (
+                      {detailData.cast.map((c, i) => (
                         <div key={i} className="flex-shrink-0 w-[72px] flex flex-col items-center text-center">
                           <div className="w-12 h-12 rounded-full overflow-hidden mb-1.5 bg-white/5 ring-1 ring-white/10">
                             <img
@@ -526,7 +464,7 @@ export function DiscoveryRow({
                       ))}
                     </div>
                   </div>
-                ) : selected.cast?.length > 0 ? (
+                ) : selected.cast && selected.cast.length > 0 ? (
                   <CastStrip cast={selected.cast} />
                 ) : null}
 
@@ -558,18 +496,18 @@ export function DiscoveryRow({
                 </div>
 
                 {/* Similar titles */}
-                {detailData?.similar?.length > 0 && (
+                {detailData?.similar && detailData.similar.length > 0 && (
                   <div className="pt-2">
                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
                       <span className="w-3 h-px bg-red-600 inline-block" />More Like This
                     </p>
                     <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
-                      {detailData.similar.map((s: any) => (
+                      {detailData.similar.map((s) => (
                         <div
                           key={s.id}
                           className="flex-shrink-0 w-[90px] cursor-pointer group/sim"
                           onClick={() => {
-                            setSelected({ ...s, description: null, cast: [], genres: [] });
+                            setSelected({ ...s, description: undefined, cast: [], genres: [] });
                           }}
                         >
                           <div className="w-full h-[135px] rounded-lg overflow-hidden bg-white/5 mb-1.5 group-hover/sim:ring-1 group-hover/sim:ring-red-600 transition-all">

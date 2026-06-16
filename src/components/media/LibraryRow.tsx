@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthData } from "../../types/auth";
 
 // ─── Library card ─────────────────────────────────────────────────────────────
 
-function LibraryCard({ lib, authData }: { lib: any; authData: any }) {
+// Change authData: any to authData: AuthData
+function LibraryCard({ lib, authData }: { lib: any; authData: AuthData }) {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
 
@@ -88,7 +90,8 @@ function LibrarySkeleton() {
 
 // ─── LibraryRow ───────────────────────────────────────────────────────────────
 
-export function LibraryRow({ authData }: { authData: any }) {
+// Change authData: any to authData: AuthData
+export function LibraryRow({ authData }: { authData: AuthData }) {
   const [libraries, setLibraries] = useState<any[]>([]);
   const [loading, setLoading]     = useState(true);
   const scrollRef                 = useRef<HTMLDivElement>(null);

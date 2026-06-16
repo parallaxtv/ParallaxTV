@@ -5,6 +5,8 @@ import { SortOrder } from "@jellyfin/sdk/lib/generated-client/models";
 import { PlayButton, GhostButton } from "../ui/Buttons";
 import { StarRating } from "../ui/StarRating";
 import { createJellyfinApi } from "../../lib/jellyfinApi";
+import { AuthData } from "../../types/auth";
+import { MediaItem } from "../../types/media";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -89,28 +91,17 @@ async function fetchTmdbTrending(): Promise<TmdbEntry[]> {
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-interface HeroItem {
-  Id: string;
-  Name: string;
-  Type: string;
-  Overview?: string;
-  CommunityRating?: number;
-  ProductionYear?: number;
-  RunTimeTicks?: number;
-  OfficialRating?: string;
-  Genres?: string[];
-  ImageTags?: { Logo?: string; Backdrop?: string; Primary?: string };
-  BackdropImageTags?: string[];
-  DateCreated?: string;
+interface HeroItem extends MediaItem {
   // Injected metadata
   _trendingRank?: number;       // lower = more trending
   _isNewlyAdded?: boolean;      // added in last 14 days
   _isTrending?: boolean;
+  _score?: number;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export function HeroBanner({ authData }: { authData: any }) {
+export function HeroBanner({ authData }: { authData: AuthData }) {
   const navigate = useNavigate();
   const hasFetched                      = React.useRef(false);
   const [heroPool, setHeroPool]         = useState<HeroItem[]>([]); // full scored pool
@@ -131,10 +122,8 @@ export function HeroBanner({ authData }: { authData: any }) {
 
     async function buildHero() {
       try {
-        // --- NEW CODE START ---
         const api = createJellyfinApi(authData.serverUrl, authData.token);
         const itemsApi = getItemsApi(api);
-        // --- NEW CODE END ---
 
         // 1. Fetch broad pool sorted by DateCreated — recent items first
         const res = await itemsApi.getItems({

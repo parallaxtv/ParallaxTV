@@ -1,5 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { LandscapeCard, PosterCard, Top10Card } from "./MediaCard";
+import { AuthData } from "../../types/auth";
+import { MediaItem } from "../../types/media";
 
 // ─── Arrow scroll container ───────────────────────────────────────────────────
 
@@ -114,10 +116,10 @@ export type RowVariant = "landscape" | "poster" | "top10";
 
 interface MediaRowProps {
   title: string;
-  items: any[];
+  items: MediaItem[]; // CHANGED from any[]
   loading: boolean;
   variant: RowVariant;
-  authData: any;
+  authData: AuthData; // CHANGE THIS
   /** Optional accent label shown next to the title e.g. "4 titles" */
   count?: boolean;
 }

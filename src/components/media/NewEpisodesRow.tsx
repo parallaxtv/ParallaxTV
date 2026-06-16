@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getItemsApi } from "@jellyfin/sdk/lib/utils/api/items-api";
 import { SortOrder } from "@jellyfin/sdk/lib/generated-client/models";
 import { createJellyfinApi } from "../../lib/jellyfinApi";
+import { AuthData } from "../../types/auth";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -22,7 +23,8 @@ function timeAgo(dateStr: string): string {
 
 // ─── New Episode Card ─────────────────────────────────────────────────────────
 
-function NewEpisodeCard({ item, authData }: { item: any; authData: any }) {
+// Change authData: any to authData: AuthData
+function NewEpisodeCard({ item, authData }: { item: any; authData: AuthData }) {
   const navigate = useNavigate();
 
   // Use series backdrop for landscape thumb
@@ -113,7 +115,8 @@ function NewEpSkeleton() {
 
 // ─── NewEpisodesRow ───────────────────────────────────────────────────────────
 
-export function NewEpisodesRow({ authData }: { authData: any }) {
+// Change authData: any to authData: AuthData
+export function NewEpisodesRow({ authData }: { authData: AuthData }) {
   const [episodes, setEpisodes] = useState<any[]>([]);
   const [loading, setLoading]   = useState(true);
 

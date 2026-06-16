@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthData } from "../../types/auth";
 
 const SAFE_PLACEHOLDER = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%3Crect%20fill%3D%22%232a2a2a%22%20width%3D%22100%25%22%20height%3D%22100%25%22%2F%3E%3C%2Fsvg%3E";
 
@@ -8,7 +9,7 @@ export function ContinueWatchingRow({
   refreshKey, 
   onLoadingChange 
 }: { 
-  authData: any; 
+  authData: AuthData; // CHANGE THIS
   refreshKey: number; 
   onLoadingChange?: (loading: boolean) => void; 
 }) {

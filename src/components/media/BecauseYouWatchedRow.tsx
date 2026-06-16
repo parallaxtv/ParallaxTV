@@ -3,10 +3,13 @@ import { getItemsApi } from "@jellyfin/sdk/lib/utils/api/items-api";
 import { SortOrder } from "@jellyfin/sdk/lib/generated-client/models";
 import { MediaRow } from "./MediaRow";
 import { createJellyfinApi } from "../../lib/jellyfinApi";
+import { AuthData } from "../../types/auth";
+import { MediaItem } from "../../types/media";
 
-export function BecauseYouWatchedRow({ authData, refreshKey }: { authData: any; refreshKey?: number }) {
-  const [sourceItem, setSourceItem] = useState<any>(null);
-  const [items, setItems]           = useState<any[]>([]);
+// Change authData: any to authData: AuthData
+export function BecauseYouWatchedRow({ authData, refreshKey }: { authData: AuthData; refreshKey?: number }) {
+  const [sourceItem, setSourceItem] = useState<MediaItem | null>(null); // CHANGED
+  const [items, setItems]           = useState<MediaItem[]>([]); // CHANGED
   const [loading, setLoading]       = useState(true);
 
   useEffect(() => {

@@ -1,11 +1,6 @@
 import { getItemsApi } from "@jellyfin/sdk/lib/utils/api/items-api";
 import { createJellyfinApi } from "../../lib/jellyfinApi";
-
-export interface AuthData {
-  userId: string;
-  serverUrl: string;
-  token: string;
-}
+import { AuthData } from "../../types/auth";
 
 // Upgraded to accept itemTypes and limit so it's fully reusable!
 export async function getLatestMedia(
@@ -53,4 +48,22 @@ export async function getItemDetails(authData: AuthData, itemId: string) {
   });
 
   return res.data.Items?.[0] ?? null;
+}
+
+export async function getMyList(authData: AuthData) {
+  const api = createJellyfinApi(authData.serverUrl, authData.token);
+  const itemsApi = getItemsApi(api);
+
+  const res = await itemsApi.getItems({
+    userId: authData.userId,
+    isFavorite: true,
+    recursive: true,
+    includeItemTypes: ["Movie", "Series"],
+    sortBy: ["DateCreated"],
+    sortOrder: ["Descending"] as any,
+    fields: ["CommunityRating", "ImageTags", "ProductionYear"] as any,
+    limit: 40,
+  });
+
+  return res.data.Items ?? [];
 }

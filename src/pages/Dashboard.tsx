@@ -1,10 +1,9 @@
-import { getLatestMedia } from "../services/jellyfin/items";
+import { getLatestMedia, getMyList } from "../services/jellyfin/items";
 import { getTop10TrendingInLibrary } from "../services/discovery/trending";
+import { useMediaCollection } from "../hooks/useMediaCollection";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { getItemsApi } from "@jellyfin/sdk/lib/utils/api/items-api";
-import { SortOrder } from "@jellyfin/sdk/lib/generated-client/models";
-import { createJellyfinApi } from "../lib/jellyfinApi";
+import { AuthData } from "../types/auth";
 import { HeroBanner } from "../components/media/HeroBanner";
 import { MediaRow } from "../components/media/MediaRow";
 import { ProfileMenu } from "../components/ui/ProfileMenu";
@@ -26,27 +25,17 @@ import logo from "../assets/parallaxtv_logo.svg";
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
-export function Dashboard({ authData, onLogout }: { authData: any; onLogout: () => void }) {
+export function Dashboard({ authData, onLogout }: { authData: AuthData; onLogout: () => void }) {
   const navigate  = useNavigate();
   const location  = useLocation();
 
   // refreshKey increments every time the user comes back to this page
   // triggering a re-fetch of Continue Watching and Up Next
   const [refreshKey, setRefreshKey] = useState(0);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // Silently enriches Worker KV with AniList data + reports library stats
   useAnimeEnrichment(authData);
-
-  const [top10Items,        setTop10Items]        = useState<any[]>([]);
-  const [myList,            setMyList]            = useState<any[]>([]);
-  const [recentMovies,      setRecentMovies]       = useState<any[]>([]);
-  const [recentShows,       setRecentShows]        = useState<any[]>([]);
-
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [loadingTop10,    setLoadingTop10]    = useState(true);
-  const [loadingMyList,   setLoadingMyList]   = useState(true);
-  const [loadingMovies,   setLoadingMovies]   = useState(true);
-  const [loadingShows,    setLoadingShows]    = useState(true);
 
   useEffect(() => { if (!authData) navigate("/"); }, [authData, navigate]);
 
@@ -73,60 +62,26 @@ export function Dashboard({ authData, onLogout }: { authData: any; onLogout: () 
     return () => window.removeEventListener("focus", onFocus);
   }, []);
 
-  // ── 2. Top 10 in Your Library ─────────────────────────────────────────────
-  useEffect(() => {
-    if (!authData) return;
-    getTop10TrendingInLibrary(authData)
-      .then(items => setTop10Items(items))
-      .catch(err => console.error("Top 10 failed", err))
-      .finally(() => setLoadingTop10(false));
-  }, [authData]);
+  // ─── Data Fetching Hooks ───────────────────────────────────────────────────
+  const { items: top10Items, loading: loadingTop10 } = useMediaCollection(
+    async () => authData ? getTop10TrendingInLibrary(authData) : [],
+    [authData]
+  );
 
-  // ── 3. My List ────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!authData) return;
-    async function load() {
-      try {
-        const api = createJellyfinApi(authData.serverUrl, authData.token);
-        const itemsApi = getItemsApi(api);
+  const { items: myList, loading: loadingMyList } = useMediaCollection(
+    async () => authData ? getMyList(authData) : [],
+    [authData]
+  );
 
-        const res = await itemsApi.getItems({
-          userId: authData.userId,
-          isFavorite: true,
-          recursive: true,
-          includeItemTypes: ["Movie", "Series"],
-          sortBy: ["DateCreated"],
-          sortOrder: [SortOrder.Descending],
-          fields: ["CommunityRating", "ImageTags", "ProductionYear"] as any,
-          limit: 40,
-        });
-        setMyList(res.data.Items ?? []);
-      } catch (err) {
-        console.error("My List failed", err);
-      } finally {
-        setLoadingMyList(false);
-      }
-    }
-    load();
-  }, [authData]);
+  const { items: recentMovies, loading: loadingMovies } = useMediaCollection(
+    async () => authData ? getLatestMedia(authData, ["Movie"], 30) : [],
+    [authData]
+  );
 
-  // ── 4. Recently Added Movies ──────────────────────────────────────────────
-  useEffect(() => {
-    if (!authData) return;
-    getLatestMedia(authData, ["Movie"], 30)
-      .then(items => setRecentMovies(items))
-      .catch(err => console.error("Recent Movies failed", err))
-      .finally(() => setLoadingMovies(false));
-  }, [authData]);
-
-  // ── 5. Recently Added TV Shows ────────────────────────────────────────────
-  useEffect(() => {
-    if (!authData) return;
-    getLatestMedia(authData, ["Series"], 30)
-      .then(items => setRecentShows(items))
-      .catch(err => console.error("Recent Shows failed", err))
-      .finally(() => setLoadingShows(false));
-  }, [authData]);
+  const { items: recentShows, loading: loadingShows } = useMediaCollection(
+    async () => authData ? getLatestMedia(authData, ["Series"], 30) : [],
+    [authData]
+  );
 
   if (!authData) return null;
 

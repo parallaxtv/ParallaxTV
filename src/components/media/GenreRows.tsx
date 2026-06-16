@@ -3,6 +3,7 @@ import { getItemsApi } from "@jellyfin/sdk/lib/utils/api/items-api";
 import { SortOrder } from "@jellyfin/sdk/lib/generated-client/models";
 import { MediaRow } from "./MediaRow";
 import { createJellyfinApi } from "../../lib/jellyfinApi";
+import { AuthData } from "../../types/auth";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -20,7 +21,8 @@ const MIN_ITEMS = 3;
 
 // ─── GenreRows ────────────────────────────────────────────────────────────────
 
-export function GenreRows({ authData }: { authData: any }) {
+// Change authData: any to authData: AuthData
+export function GenreRows({ authData }: { authData: AuthData }) {
   const [genreRows, setGenreRows] = useState<{ genre: string; items: any[] }[]>([]);
   const [selectedGenre, setSelectedGenre] = useState("");
   const [loading, setLoading]     = useState(true);
