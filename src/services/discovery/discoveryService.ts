@@ -1,19 +1,8 @@
 import { DiscoveryItem, DiscoveryDetail } from "../../types/discovery";
+import { normalizeTitle } from "../../utils/titles";
+import { extractYoutubeKey } from "../../utils/trailers";
 
 const API = "https://parallax-api.parallaxtv-api.workers.dev";
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-export function normTitle(t: string): string {
-  if (!t) return "";
-  return t.toLowerCase().replace(/^(the |a |an )/i, "").replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
-}
-
-export function extractYoutubeKey(url?: string | null): string | null {
-  if (!url) return null;
-  const ytMatch = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/);
-  return ytMatch ? ytMatch[1] : null;
-}
 
 // ─── Service Functions ───────────────────────────────────────────────────────
 
@@ -28,9 +17,16 @@ export async function fetchDiscoveryItems(
                             `${API}/api/movies`;
 
     const res = await fetch(endpoint);
+
+    // Guard: If the API goes down (like a 500 error), fail silently and gracefully
+    if (!res.ok) {
+      console.warn(`[DiscoveryService] API returned ${res.status} for ${type}`);
+      return [];
+    }
+
     const data = await res.json();
 
-    if (!data.success) return [];
+    if (!data?.success) return [];
 
     if (type === "anime" || type === "seasonal") {
       return data.data as DiscoveryItem[];
@@ -39,7 +35,7 @@ export async function fetchDiscoveryItems(
       return data.data.map((item: DiscoveryItem) => ({ ...item, cast: [] }));
     }
   } catch (err) {
-    console.error("fetchDiscoveryItems failed:", err);
+    console.warn(`[DiscoveryService] Network error fetching items for ${type}:`, err);
     return [];
   }
 }
@@ -59,9 +55,12 @@ export async function fetchDiscoveryDetails(
       // Fallback: full detail fetch by MAL ID
       const malId = item.malId ?? item.id;
       const res = await fetch(`${API}/api/anime/${malId}`);
+      
+      if (!res.ok) return { detail: null, trailerKey: null };
+
       const data = await res.json();
       
-      if (data.success && data.data) {
+      if (data?.success && data?.data) {
         return { 
           detail: data.data, 
           trailerKey: extractYoutubeKey(data.data.trailerUrl) 
@@ -76,9 +75,12 @@ export async function fetchDiscoveryDetails(
       : `${API}/api/kdrama/${item.id}`;
 
     const res = await fetch(endpoint);
+    
+    if (!res.ok) return { detail: null, trailerKey: null };
+
     const data = await res.json();
     
-    if (data.success && data.data) {
+    if (data?.success && data?.data) {
       return { 
         detail: data.data, 
         trailerKey: extractYoutubeKey(data.data.trailer?.youtubeUrl) 
@@ -87,7 +89,7 @@ export async function fetchDiscoveryDetails(
     
     return { detail: null, trailerKey: null };
   } catch (err) {
-    console.error("fetchDiscoveryDetails failed:", err);
+    console.warn(`[DiscoveryService] Network error fetching details for ${item.title}:`, err);
     return { detail: null, trailerKey: null };
   }
 }
