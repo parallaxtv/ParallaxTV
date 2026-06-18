@@ -19,20 +19,34 @@ import { UpNextRow } from "../components/media/UpNextRow";
 import { BecauseYouWatchedRow } from "../components/media/BecauseYouWatchedRow";
 import { DiscoveryRow } from "../components/media/DiscoveryRow";
 import { useAnimeEnrichment } from "../hooks/useAnimeEnrichment";
+import { useSettings } from "../store/settings";
 
-// Import the logo
 import logo from "../assets/parallaxtv_logo.svg";
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 export function Dashboard({ authData, onLogout }: { authData: AuthData; onLogout: () => void }) {
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // refreshKey increments every time the user comes back to this page
-  // triggering a re-fetch of Continue Watching and Up Next
   const [refreshKey, setRefreshKey] = useState(0);
   const [searchOpen, setSearchOpen] = useState(false);
+
+  // ─── Settings ───────────────────────────────────────────────────────────────
+  const {
+    theme,
+    backdropBlur,
+    animationsEnabled,
+    showMovies,
+    showAnime,
+    showKDrama,
+  } = useSettings();
+
+  const themeBg = {
+    dark:     "bg-[#141414]",
+    amoled:   "bg-black",
+    midnight: "bg-[#0d1117]",
+  }[theme];
 
   // Silently enriches Worker KV with AniList data + reports library stats
   useAnimeEnrichment(authData);
@@ -55,14 +69,13 @@ export function Dashboard({ authData, onLogout }: { authData: AuthData; onLogout
     setRefreshKey(k => k + 1);
   }, [location.key]);
 
-  // Also re-fetch when window regains focus (user alt-tabs back)
   useEffect(() => {
     const onFocus = () => setRefreshKey(k => k + 1);
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
   }, []);
 
-  // ─── Data Fetching Hooks ───────────────────────────────────────────────────
+  // ─── Data Fetching ──────────────────────────────────────────────────────────
   const { items: top10Items, loading: loadingTop10 } = useMediaCollection(
     async () => authData ? getTop10TrendingInLibrary(authData) : [],
     [authData]
@@ -85,24 +98,28 @@ export function Dashboard({ authData, onLogout }: { authData: AuthData; onLogout
 
   if (!authData) return null;
 
+  const showDiscoverySection = showMovies || showAnime || showKDrama;
+
   return (
-    <div className="min-h-screen bg-[#141414] text-white animate-[fadeIn_0.3s_ease-out] overflow-x-hidden">
+    <div className={`min-h-screen ${themeBg} text-white overflow-x-hidden
+      ${animationsEnabled ? "animate-[fadeIn_0.3s_ease-out]" : ""}`}>
 
       {/* Floating header */}
-      <div className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-12 py-5 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
-        <img 
-          src={logo} 
-          alt="Parallax TV" 
-          className="h-8 w-auto drop-shadow-md pointer-events-none" 
+      <div className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-12 py-5
+        bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
+        <img
+          src={logo}
+          alt="Parallax TV"
+          className="h-8 w-auto drop-shadow-md pointer-events-none"
         />
 
         <div className="flex items-center gap-3 pointer-events-auto">
           {/* Search button */}
           <button
             onClick={() => setSearchOpen(true)}
-            className="flex items-center gap-2.5 bg-white/8 hover:bg-white/15 border border-white/10
-              hover:border-white/25 text-gray-400 hover:text-white backdrop-blur-sm
-              px-4 py-2 rounded-full transition-all duration-200 text-sm"
+            className={`flex items-center gap-2.5 bg-white/8 hover:bg-white/15 border border-white/10
+              hover:border-white/25 text-gray-400 hover:text-white px-4 py-2 rounded-full
+              transition-all duration-200 text-sm backdrop-blur-sm`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
@@ -135,39 +152,43 @@ export function Dashboard({ authData, onLogout }: { authData: AuthData; onLogout
           authData={authData}
         />
 
-        <ContinueWatchingRow 
-          authData={authData} 
-          refreshKey={refreshKey} 
-        />
+        <ContinueWatchingRow authData={authData} refreshKey={refreshKey} />
 
-        <UpNextRow 
-          authData={authData} 
-          refreshKey={refreshKey} 
-          onInteraction={() => setRefreshKey(k => k + 1)} 
+        <UpNextRow
+          authData={authData}
+          refreshKey={refreshKey}
+          onInteraction={() => setRefreshKey(k => k + 1)}
         />
 
         <NewEpisodesRow authData={authData} />
 
         <GenreRows authData={authData} />
 
-        {/* Global discovery rows */}
-        <div className="mt-16 pt-8 border-t border-white/10 relative">
-          <div className="absolute top-0 left-0 w-32 h-px bg-gradient-to-r from-red-600 to-transparent" />
-          <h2 className="text-2xl font-black text-white/90 mb-6 flex items-center gap-3">
-            <span className="w-1.5 h-6 bg-red-600 inline-block rounded-full shadow-[0_0_10px_rgba(220,38,38,0.8)]" />
-            Global Discovery
-          </h2>
-          
-          <DiscoveryRow type="movies" title="Trending Movies Worldwide" authData={authData} />
-          <DiscoveryRow type="anime" title="Trending Anime Worldwide" authData={authData} />
-          <DiscoveryRow type="seasonal" title="This Season's Anime" authData={authData} />
-          <DiscoveryRow type="kdrama" title="Trending K-Dramas" authData={authData} />
-        </div>
+        {/* Global discovery rows — controlled by Discovery settings */}
+        {showDiscoverySection && (
+          <div className="mt-16 pt-8 border-t border-white/10 relative">
+            <div className="absolute top-0 left-0 w-32 h-px bg-gradient-to-r from-red-600 to-transparent" />
+            <h2 className="text-2xl font-black text-white/90 mb-6 flex items-center gap-3">
+              <span className="w-1.5 h-6 bg-red-600 inline-block rounded-full shadow-[0_0_10px_rgba(220,38,38,0.8)]" />
+              Global Discovery
+            </h2>
 
-        <BecauseYouWatchedRow 
-          authData={authData} 
-          refreshKey={refreshKey} 
-        />
+            {showMovies && (
+              <DiscoveryRow type="movies" title="Trending Movies Worldwide" authData={authData} />
+            )}
+            {showAnime && (
+              <>
+                <DiscoveryRow type="anime"    title="Trending Anime Worldwide" authData={authData} />
+                <DiscoveryRow type="seasonal" title="This Season's Anime"      authData={authData} />
+              </>
+            )}
+            {showKDrama && (
+              <DiscoveryRow type="kdrama" title="Trending K-Dramas" authData={authData} />
+            )}
+          </div>
+        )}
+
+        <BecauseYouWatchedRow authData={authData} refreshKey={refreshKey} />
 
         <MediaRow
           title="My List"
@@ -178,10 +199,10 @@ export function Dashboard({ authData, onLogout }: { authData: AuthData; onLogout
           count
         />
 
-        <WatchHistoryRow 
-          authData={authData} 
-          refreshKey={refreshKey} 
-          onInteraction={() => setRefreshKey(k => k + 1)} 
+        <WatchHistoryRow
+          authData={authData}
+          refreshKey={refreshKey}
+          onInteraction={() => setRefreshKey(k => k + 1)}
         />
 
         <MediaRow

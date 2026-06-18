@@ -1,9 +1,11 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { getItemsApi } from "@jellyfin/sdk/lib/utils/api/items-api";
+import { createJellyfinApi } from "../../lib/jellyfinApi"; // ── ADDED IMPORT ──
+import { AuthData } from "../../types/auth";               // ── ADDED IMPORT ──
 
 interface SurpriseMeProps {
-  authData: any;
+  authData: AuthData; // ── UPDATED TYPE ──
 }
 
 export function SurpriseMe({ authData }: SurpriseMeProps) {
@@ -15,7 +17,10 @@ export function SurpriseMe({ authData }: SurpriseMeProps) {
     setState("spinning");
 
     try {
-      const itemsApi = getItemsApi(authData.api);
+      // ── FIX: Properly initialize the Jellyfin API client ──
+      const api = createJellyfinApi(authData.serverUrl, authData.token);
+      const itemsApi = getItemsApi(api);
+      
       const res = await itemsApi.getItems({
         userId: authData.userId,
         includeItemTypes: ["Movie", "Series"],

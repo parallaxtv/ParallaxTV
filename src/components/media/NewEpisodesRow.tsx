@@ -5,7 +5,7 @@ import { SortOrder } from "@jellyfin/sdk/lib/generated-client/models";
 import { createJellyfinApi } from "../../lib/jellyfinApi";
 import { AuthData } from "../../types/auth";
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function imgUrl(serverUrl: string, token: string, id: string, type: "Primary" | "Backdrop", w: number) {
   return `${serverUrl}/Items/${id}/Images/${type}?fillWidth=${w}&quality=90&api_key=${token}`;
@@ -23,11 +23,9 @@ function timeAgo(dateStr: string): string {
 
 // ─── New Episode Card ─────────────────────────────────────────────────────────
 
-// Change authData: any to authData: AuthData
 function NewEpisodeCard({ item, authData }: { item: any; authData: AuthData }) {
   const navigate = useNavigate();
 
-  // Use series backdrop for landscape thumb
   const thumb = item.SeriesId
     ? imgUrl(authData.serverUrl, authData.token, item.SeriesId, "Backdrop", 560)
     : imgUrl(authData.serverUrl, authData.token, item.Id, "Primary", 560);
@@ -49,36 +47,32 @@ function NewEpisodeCard({ item, authData }: { item: any; authData: AuthData }) {
         state: { item: { Id: item.SeriesId ?? item.Id, Name: item.SeriesName ?? item.Name, Type: item.SeriesId ? "Series" : item.Type } }
       })}
     >
-      {/* Landscape thumbnail */}
       <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-[#1c1c1c] mb-2.5 shadow-lg">
         <img
           src={thumb}
           alt={item.SeriesName ?? item.Name}
           className="w-full h-full object-cover transition-all duration-300
             group-hover:scale-105 group-hover:brightness-75"
+          onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
         />
 
-        {/* Play overlay */}
         <div className="absolute inset-0 flex items-center justify-center
           opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
           <button onClick={playEpisode} className="w-12 h-12 bg-white hover:bg-white/90 rounded-full flex items-center justify-center shadow-2xl transition-transform hover:scale-110" title="Play">
-            <svg className="w-5 h-5 fill-black ml-0.5" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
+            <svg className="w-5 h-5 fill-black ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           </button>
         </div>
 
-        {/* NEW badge */}
         <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-black
           px-2 py-0.5 rounded uppercase tracking-wider z-10 shadow-lg">
           New
         </div>
 
-        {/* Episode label */}
         <div className="absolute bottom-2 left-2 right-2 z-10">
           <div className="bg-black/70 backdrop-blur-sm rounded-lg px-2.5 py-1.5 flex items-center gap-2">
             {seriesThumb && (
-              <img src={seriesThumb} alt="" className="w-6 h-8 object-cover rounded flex-shrink-0" />
+              <img src={seriesThumb} alt="" className="w-6 h-8 object-cover rounded flex-shrink-0"
+                onError={(e) => { e.currentTarget.style.display = "none"; }} />
             )}
             <div className="min-w-0">
               <p className="text-white text-[10px] font-bold truncate">
@@ -90,7 +84,6 @@ function NewEpisodeCard({ item, authData }: { item: any; authData: AuthData }) {
         </div>
       </div>
 
-      {/* Series name */}
       <p className="text-white text-xs font-semibold truncate px-0.5 group-hover:text-white/80">
         {item.SeriesName ?? item.Name}
       </p>
@@ -115,70 +108,75 @@ function NewEpSkeleton() {
 
 // ─── NewEpisodesRow ───────────────────────────────────────────────────────────
 
-// Change authData: any to authData: AuthData
 export function NewEpisodesRow({ authData }: { authData: AuthData }) {
   const [episodes, setEpisodes] = useState<any[]>([]);
   const [loading, setLoading]   = useState(true);
 
   useEffect(() => {
     if (!authData) return;
+
     async function load() {
       try {
-        // --- NEW CODE START ---
-        const api = createJellyfinApi(authData.serverUrl, authData.token);
+        const api      = createJellyfinApi(authData.serverUrl, authData.token);
         const itemsApi = getItemsApi(api);
-        // --- NEW CODE END ---
 
-        // 1. Get series the user has watched (has play history)
-        const watchedRes = await itemsApi.getItems({
-          userId: authData.userId,
-          includeItemTypes: ["Series"],
-          recursive: true,
-          filters: ["IsPlayed" as any],
-          fields: ["UserData"] as any,
-          limit: 100,
-        });
-        // Also get series currently in progress
-        const inProgressRes = await itemsApi.getItems({
-          userId: authData.userId,
-          includeItemTypes: ["Series"],
-          recursive: true,
-          filters: ["IsResumable" as any],
-          fields: ["UserData"] as any,
-          limit: 100,
-        });
+        // 1. Get series the user has watched or started
+        const [watchedRes, inProgressRes] = await Promise.all([
+          itemsApi.getItems({
+            userId: authData.userId,
+            includeItemTypes: ["Series"],
+            recursive: true,
+            filters: ["IsPlayed" as any],
+            fields: ["UserData"] as any,
+            limit: 200,
+          }),
+          itemsApi.getItems({
+            userId: authData.userId,
+            includeItemTypes: ["Series"],
+            recursive: true,
+            filters: ["IsResumable" as any],
+            fields: ["UserData"] as any,
+            limit: 200,
+          }),
+        ]);
 
         const watchedIds = new Set([
-          ...(watchedRes.data.Items ?? []).map((i: any) => i.Id),
+          ...(watchedRes.data.Items  ?? []).map((i: any) => i.Id),
           ...(inProgressRes.data.Items ?? []).map((i: any) => i.Id),
         ]);
 
         if (watchedIds.size === 0) { setLoading(false); return; }
 
-        // 2. Get recently added episodes from series the user knows
-        const cutoff = new Date();
-        cutoff.setDate(cutoff.getDate() - 30); // episodes added in last 30 days
-
+        // 2. Get recently added episodes — NO minDateLastSaved, NO IsUnplayed filter
+        //    to avoid the Jellyfin 500. We filter client-side instead.
         const res = await itemsApi.getItems({
           userId: authData.userId,
           includeItemTypes: ["Episode"],
           recursive: true,
           sortBy: ["DateCreated"],
           sortOrder: [SortOrder.Descending],
-          minDateLastSaved: cutoff.toISOString(),
           fields: ["Overview", "DateCreated", "SeriesId", "SeriesName",
                    "ParentIndexNumber", "IndexNumber", "ImageTags"] as any,
-          limit: 100,
-          filters: ["IsUnplayed" as any], // only show unwatched new episodes
+          limit: 150,
         });
 
-        const allNew = res.data.Items ?? [];
+        const cutoffMs = Date.now() - 30 * 24 * 60 * 60 * 1000; // 30 days ago
 
-        // 3. Filter to only episodes from series user has watched/started
-        // Then deduplicate by series (show only latest new ep per series)
+        // 3. Client-side filters:
+        //    - only episodes from series user has watched/started
+        //    - only episodes added in the last 30 days
+        //    - only unplayed (UserData.Played !== true)
+        //    - deduplicate: one card per series (latest ep)
         const seenSeries = new Set<string>();
-        const filtered = allNew
-          .filter((ep: any) => ep.SeriesId && watchedIds.has(ep.SeriesId))
+        const filtered = (res.data.Items ?? [])
+          .filter((ep: any) => {
+            if (!ep.SeriesId) return false;
+            if (!watchedIds.has(ep.SeriesId)) return false;
+            if (ep.UserData?.Played) return false;
+            const added = ep.DateCreated ? new Date(ep.DateCreated).getTime() : 0;
+            if (added < cutoffMs) return false;
+            return true;
+          })
           .filter((ep: any) => {
             if (seenSeries.has(ep.SeriesId)) return false;
             seenSeries.add(ep.SeriesId);
@@ -192,6 +190,7 @@ export function NewEpisodesRow({ authData }: { authData: AuthData }) {
         setLoading(false);
       }
     }
+
     load();
   }, [authData]);
 
@@ -211,7 +210,6 @@ export function NewEpisodesRow({ authData }: { authData: AuthData }) {
         )}
       </div>
 
-      {/* Arrow scroll */}
       <div className="relative">
         <div
           className="flex overflow-x-auto scrollbar-hide"
@@ -220,9 +218,7 @@ export function NewEpisodesRow({ authData }: { authData: AuthData }) {
         >
           {loading
             ? Array.from({ length: 4 }).map((_, i) => <NewEpSkeleton key={i} />)
-            : episodes.map(ep => (
-                <NewEpisodeCard key={ep.Id} item={ep} authData={authData} />
-              ))
+            : episodes.map(ep => <NewEpisodeCard key={ep.Id} item={ep} authData={authData} />)
           }
         </div>
       </div>

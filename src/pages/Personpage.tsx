@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getItemsApi } from "@jellyfin/sdk/lib/utils/api/items-api";
 import { SortOrder } from "@jellyfin/sdk/lib/generated-client/models";
 import { createJellyfinApi } from "../lib/jellyfinApi";
@@ -34,6 +34,11 @@ interface AniListStaff {
 }
 
 async function fetchAniListStaff(name: string): Promise<AniListStaff | null> {
+  const cleanName = name.replace(/\(.*?\)/g, "").trim();
+  if (!cleanName) return null;
+
+  console.log("Searching AniList for:", cleanName);
+
   const query = `
     query ($search: String) {
       Staff(search: $search) {
@@ -57,13 +62,26 @@ async function fetchAniListStaff(name: string): Promise<AniListStaff | null> {
         }
       }
     }`;
+    
   try {
     const res = await fetch("https://graphql.anilist.co", {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ query, variables: { search: name } }),
+      body: JSON.stringify({ query, variables: { search: cleanName } }),
     });
+    
+    // ── FIX #2: Graceful 404 Handling ──
+    if (!res.ok) {
+      if (res.status === 404) {
+        return null; // Not found on AniList, silently fail (expected behavior)
+      }
+      console.error("AniList Error:", res.status, await res.text());
+      return null;
+    }
+
     const data = await res.json();
+    console.log("AniList Result:", data);
+
     const s = data?.data?.Staff;
     if (!s) return null;
 
@@ -98,7 +116,8 @@ async function fetchAniListStaff(name: string): Promise<AniListStaff | null> {
         };
       }),
     };
-  } catch {
+  } catch (err) {
+    console.error("Fetch AniList Staff Exception:", err);
     return null;
   }
 }
@@ -146,19 +165,18 @@ export function PersonPage({ authData }: { authData: any }) {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter]   = useState<"All" | "Movie" | "Series">("All");
   const [aniStaff, setAniStaff] = useState<AniListStaff | null | "idle">("idle");
+  
+  const aniListFetchedRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    if (!authData || !id) return;
+    if (!authData?.serverUrl || !authData?.token || !id) return;
     setLoading(true);
 
     async function loadData() {
       try {
-        // --- NEW CODE START ---
         const api = createJellyfinApi(authData.serverUrl, authData.token);
         const itemsApi = getItemsApi(api);
-        // --- NEW CODE END ---
         
-        // Fetch Full Person Details & Their Works simultaneously
         const [personRes, worksRes] = await Promise.all([
           itemsApi.getItems({
             userId: authData.userId,
@@ -188,32 +206,46 @@ export function PersonPage({ authData }: { authData: any }) {
       }
     }
     loadData();
-  }, [authData, id]);
+  }, [authData?.serverUrl, authData?.token, authData?.userId, id]);
 
-  // AniList enrichment — triggered for voice actors / anime people
   useEffect(() => {
     const name = personDetails?.Name ?? basicPerson?.Name;
-    if (!name) return;
+    if (!name || loading) return; 
+
+    // ── FIX #3: Skip Studios & Animation Houses ──
+    const nameLower = name.toLowerCase();
+    if (
+      nameLower.includes("studio") ||
+      nameLower.includes("works") ||
+      nameLower.includes("production") ||
+      nameLower.includes("animation")
+    ) {
+      return;
+    }
+
+    if (aniListFetchedRef.current.has(name)) return;
+    aniListFetchedRef.current.add(name);
 
     const typesArr: string[] = basicPerson?.allTypes ?? (basicPerson?.Type ? [basicPerson.Type] : []);
     const roles = (basicPerson?.allRoles ?? []).join(" ").toLowerCase();
+
+    // ── FIX #1: Strict VA Detection ──
     const isVA =
       typesArr.includes("VoiceActor") ||
       roles.includes("voice") ||
-      roles.includes("(va)") ||
-      typesArr.includes("Actor"); // Try for anyone — if AniList has no result we just skip
+      roles.includes("(va)");
 
     if (!isVA) return;
 
-    setAniStaff(null); // null = loading
+    setAniStaff(null);
     fetchAniListStaff(name).then(result => {
-      setAniStaff(result ?? "idle"); // "idle" means not found
+      setAniStaff(result ?? "idle");
     });
-  }, [personDetails?.Name, basicPerson?.Name]);
+
+  }, [personDetails?.Name, basicPerson?.Name, loading, basicPerson]);
 
   const filtered = filter === "All" ? works : works.filter(w => w.Type === filter);
 
-  // Use the detailed person if available, fallback to the basic one passed via routing
   const activePerson = personDetails || basicPerson || {};
   const personName = activePerson.Name ?? "Unknown Person";
   const hasPhoto   = activePerson.PrimaryImageTag || activePerson.ImageTags?.Primary;
@@ -221,12 +253,10 @@ export function PersonPage({ authData }: { authData: any }) {
     ? `${authData.serverUrl}/Items/${id}/Images/Primary?fillHeight=600&fillWidth=400&quality=96&api_key=${authData.token}`
     : `https://ui-avatars.com/api/?name=${encodeURIComponent(personName)}&background=2a2a2a&color=666&size=400`;
 
-  // Format Birth Date
   const birthDate = activePerson.PremiereDate 
     ? new Date(activePerson.PremiereDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
     : null;
 
-  // Extract all the roles the person had (e.g. Actor, Director, Voice Actor)
   let professionsStr = "";
   let typesArray: string[] = [];
 
@@ -236,20 +266,52 @@ export function PersonPage({ authData }: { authData: any }) {
     typesArray = [basicPerson.Type];
   }
 
-  // --- SMART VOICE ACTOR DETECTION ---
-  // Jellyfin sometimes lists anime/cartoon voice actors simply as "Actor" but puts "(voice)" in their character role.
-  const combinedRoles = (basicPerson?.allRoles || []).join(" ").toLowerCase();
-  const hasVoiceRole = combinedRoles.includes("(voice)") || combinedRoles.includes("voice") || combinedRoles.includes("(va)");
+  let displayTypes = [...typesArray];
 
-  if (hasVoiceRole && !typesArray.includes("VoiceActor")) {
-    typesArray.push("VoiceActor");
+  // ── Smart Voice Actor Detection ──
+  // Three independent signals — any one is sufficient to promote Actor → Voice Actor.
+  //
+  // Signal 1: Role string contains an explicit voice marker.
+  //   Jellyfin stores "Loaf (voice)" or similar for Western animated films.
+  const combinedRoles = (basicPerson?.allRoles ?? []).join(" ").toLowerCase();
+  const roleSignalsVoice =
+    combinedRoles.includes("(voice)") ||
+    combinedRoles.includes("voice") ||
+    combinedRoles.includes("(va)");
+
+  // Signal 2: DetailsCast already promoted them to VoiceActor when navigating
+  //   from an anime/animation detail page.
+  const alreadyTaggedVA = displayTypes.includes("VoiceActor");
+
+  // Signal 3: Their works are predominantly animated/anime.
+  //   Jellyfin stores Type="Actor" for Japanese VA's with no "(voice)" in the role
+  //   field — the only reliable signal is the genres of their filmography.
+  //   Threshold: ≥60% of works with a known genre are Animation or Anime.
+  const worksWithGenres = works.filter(w => w.Genres?.length > 0);
+  const animatedWorks   = worksWithGenres.filter(w =>
+    w.Genres.some((g: string) => /anime|animation/i.test(g))
+  );
+  const worksSignalVoice =
+    worksWithGenres.length > 0 &&
+    animatedWorks.length / worksWithGenres.length >= 0.6;
+
+  if (displayTypes.includes("Actor") && (roleSignalsVoice || alreadyTaggedVA || worksSignalVoice)) {
+    // Promote Actor → VoiceActor; preserve any other types (Director, Writer, etc.)
+    displayTypes = displayTypes.map((t) => (t === "Actor" ? "VoiceActor" : t));
   }
 
-  if (typesArray.length > 0) {
-    professionsStr = Array.from(new Set(typesArray))
-      .map((t: string) => t.replace(/([A-Z])/g, ' $1').trim())
+  if (displayTypes.length > 0) {
+    professionsStr = Array.from(new Set(displayTypes))
+      .map((t: string) => t.replace(/([A-Z])/g, " $1").trim())
       .join(" • ");
   }
+
+  console.log({
+    person: personName,
+    jellyfinTypes: typesArray,
+    aniStaff,
+    professionsStr,
+  });
 
   const rolesStr = basicPerson?.allRoles?.join(" / ");
 

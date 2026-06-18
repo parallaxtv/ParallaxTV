@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSettings } from "../../store/settings";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -8,25 +10,65 @@ function IconLogout()   { return <svg className="w-4 h-4" fill="none" stroke="cu
 function IconCheck()    { return <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>; }
 function IconSpinner()  { return <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>; }
 
-// ─── Scan state type ──────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 type ScanState = "idle" | "scanning" | "done" | "error";
 
 const TMDB_KEY       = import.meta.env.VITE_TMDB_API_KEY as string | undefined;
 const TMDB_CACHE_KEY = "jellyflix_tmdb_trending";
 
-// ─── ProfileMenu ──────────────────────────────────────────────────────────────
-
 interface ProfileMenuProps {
   authData: any;
   onLogout: () => void;
 }
 
+// ─── Avatar ───────────────────────────────────────────────────────────────────
+
+function Avatar({
+  serverUrl, token, userId, initials, size = "md", open = false,
+}: {
+  serverUrl: string; token: string; userId: string;
+  initials: string; size?: "md" | "lg"; open?: boolean;
+}) {
+  const [failed, setFailed] = useState(false);
+  const avatarUrl = `${serverUrl}/Users/${userId}/Images/Primary?quality=90&api_key=${token}`;
+  const dim = size === "lg" ? "w-10 h-10" : "w-10 h-10";
+  const base = `${dim} rounded-full flex items-center justify-center font-black text-sm
+    bg-gradient-to-br from-red-600 to-red-800 text-white flex-shrink-0 overflow-hidden`;
+  const border = open
+    ? "border-2 border-white scale-105"
+    : "border-2 border-white/20 hover:border-white/50 hover:scale-105";
+
+  if (!failed) {
+    return (
+      <div className={`${base} ${size === "md" ? border : ""} shadow-lg transition-all duration-200`}>
+        <img
+          src={avatarUrl}
+          alt={initials}
+          className="w-full h-full object-cover"
+          onError={() => setFailed(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${base} ${size === "md" ? border : ""} shadow-lg transition-all duration-200`}>
+      {initials}
+    </div>
+  );
+}
+
+// ─── ProfileMenu ──────────────────────────────────────────────────────────────
+
 export function ProfileMenu({ authData, onLogout }: ProfileMenuProps) {
-  const [open, setOpen]         = useState(false);
+  const navigate = useNavigate();
+  const { backdropBlur } = useSettings();
+
+  const [open, setOpen]           = useState(false);
   const [scanState, setScanState] = useState<ScanState>("idle");
-  const [scanMsg, setScanMsg]   = useState("");
-  const [lastScan, setLastScan] = useState<string | null>(() => {
+  const [scanMsg, setScanMsg]     = useState("");
+  const [lastScan, setLastScan]   = useState<string | null>(() => {
     try {
       const c = localStorage.getItem(TMDB_CACHE_KEY);
       if (c) {
@@ -39,7 +81,6 @@ export function ProfileMenu({ authData, onLogout }: ProfileMenuProps) {
 
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close on outside click
   useEffect(() => {
     function handle(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node))
@@ -49,7 +90,6 @@ export function ProfileMenu({ authData, onLogout }: ProfileMenuProps) {
     return () => document.removeEventListener("mousedown", handle);
   }, []);
 
-  // ── Force TMDB scan ────────────────────────────────────────────────────────
   async function handleForceScan() {
     if (scanState === "scanning") return;
     if (!TMDB_KEY) {
@@ -63,7 +103,6 @@ export function ProfileMenu({ authData, onLogout }: ProfileMenuProps) {
     setScanMsg("Fetching latest trending data…");
 
     try {
-      // Clear cache to force fresh fetch
       localStorage.removeItem(TMDB_CACHE_KEY);
 
       const [mr, tr] = await Promise.all([
@@ -90,19 +129,19 @@ export function ProfileMenu({ authData, onLogout }: ProfileMenuProps) {
       setLastScan(now);
       setScanState("done");
       setScanMsg(`Updated ${movies.length + tv.length} titles`);
-
-      // Auto reset after 4s
       setTimeout(() => { setScanState("idle"); setScanMsg(""); }, 4000);
-    } catch (err) {
+    } catch {
       setScanState("error");
       setScanMsg("Scan failed — check your API key");
       setTimeout(() => { setScanState("idle"); setScanMsg(""); }, 4000);
     }
   }
 
-  // ── Avatar initials ────────────────────────────────────────────────────────
   const username: string = authData?.username ?? authData?.userName ?? "U";
   const initials = username.slice(0, 2).toUpperCase();
+  const serverUrl = authData?.serverUrl ?? "";
+  const token     = authData?.token ?? "";
+  const userId    = authData?.userId ?? "";
 
   return (
     <div ref={menuRef} className="relative pointer-events-auto">
@@ -110,13 +149,11 @@ export function ProfileMenu({ authData, onLogout }: ProfileMenuProps) {
       {/* Avatar button */}
       <button
         onClick={() => setOpen(v => !v)}
-        className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm
-          bg-gradient-to-br from-red-600 to-red-800 text-white shadow-lg
-          border-2 transition-all duration-200
-          ${open ? "border-white scale-105" : "border-white/20 hover:border-white/50 hover:scale-105"}`}
         aria-label="Profile menu"
+        className="focus:outline-none"
       >
-        {initials}
+        <Avatar serverUrl={serverUrl} token={token} userId={userId}
+          initials={initials} size="md" open={open} />
       </button>
 
       {/* Dropdown */}
@@ -126,19 +163,18 @@ export function ProfileMenu({ authData, onLogout }: ProfileMenuProps) {
           style={{
             background: "linear-gradient(135deg, rgba(20,20,20,0.98) 0%, rgba(28,28,28,0.98) 100%)",
             border: "1px solid rgba(255,255,255,0.08)",
-            backdropFilter: "blur(20px)",
+            backdropFilter: backdropBlur ? "blur(20px)" : "none",
             animation: "dropdownIn 0.18s ease-out both",
           }}
         >
           {/* Profile header */}
           <div className="px-4 py-4 border-b border-white/5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm bg-gradient-to-br from-red-600 to-red-800 text-white flex-shrink-0">
-                {initials}
-              </div>
+              <Avatar serverUrl={serverUrl} token={token} userId={userId}
+                initials={initials} size="lg" />
               <div className="min-w-0">
                 <p className="text-white font-semibold text-sm truncate">{username}</p>
-                <p className="text-gray-500 text-xs truncate">{authData?.serverUrl ?? ""}</p>
+                <p className="text-gray-500 text-xs truncate">{serverUrl}</p>
               </div>
             </div>
           </div>
@@ -146,7 +182,6 @@ export function ProfileMenu({ authData, onLogout }: ProfileMenuProps) {
           {/* Menu items */}
           <div className="py-1.5">
 
-            {/* ── Force TMDB Scan ────────────────────────────────────────── */}
             {TMDB_KEY && (
               <div className="px-3 py-1.5">
                 <button
@@ -163,9 +198,8 @@ export function ProfileMenu({ authData, onLogout }: ProfileMenuProps) {
                     }`}
                 >
                   <span className={`flex-shrink-0 ${
-                    scanState === "done" ? "text-green-400" :
-                    scanState === "error" ? "text-red-400" :
-                    "text-gray-400"
+                    scanState === "done"  ? "text-green-400" :
+                    scanState === "error" ? "text-red-400"   : "text-gray-400"
                   }`}>
                     {scanState === "scanning" ? <IconSpinner /> :
                      scanState === "done"     ? <IconCheck />   : <IconRefresh />}
@@ -175,9 +209,9 @@ export function ProfileMenu({ authData, onLogout }: ProfileMenuProps) {
                       scanState === "done"  ? "text-green-400" :
                       scanState === "error" ? "text-red-400"   : "text-white"
                     }`}>
-                      {scanState === "scanning" ? "Scanning…" :
+                      {scanState === "scanning" ? "Scanning…"      :
                        scanState === "done"     ? "Scan complete!" :
-                       scanState === "error"    ? "Scan failed" :
+                       scanState === "error"    ? "Scan failed"    :
                        "Refresh Trending Data"}
                     </p>
                     <p className="text-[11px] text-gray-600 truncate mt-0.5">
@@ -188,27 +222,22 @@ export function ProfileMenu({ authData, onLogout }: ProfileMenuProps) {
               </div>
             )}
 
-            {/* Divider */}
             <div className="mx-3 my-1 h-px bg-white/5" />
 
-            {/* Settings (placeholder) */}
             <button
               className="w-full flex items-center gap-3 px-6 py-2.5 text-left hover:bg-white/5 transition-colors group"
-              onClick={() => { setOpen(false); /* TODO: navigate to settings */ }}
+              onClick={() => { setOpen(false); navigate("/settings"); }}
             >
               <span className="text-gray-500 group-hover:text-gray-300 transition-colors flex-shrink-0">
                 <IconSettings />
               </span>
-              <div>
-                <p className="text-sm text-gray-300 group-hover:text-white transition-colors font-medium">Settings</p>
-                <p className="text-[11px] text-gray-600">Coming soon</p>
-              </div>
+              <p className="text-sm text-gray-300 group-hover:text-white transition-colors font-medium">
+                Settings
+              </p>
             </button>
 
-            {/* Divider */}
             <div className="mx-3 my-1 h-px bg-white/5" />
 
-            {/* Sign out */}
             <button
               className="w-full flex items-center gap-3 px-6 py-2.5 text-left hover:bg-red-500/10 transition-colors group"
               onClick={() => { setOpen(false); onLogout(); }}
@@ -222,15 +251,6 @@ export function ProfileMenu({ authData, onLogout }: ProfileMenuProps) {
             </button>
 
           </div>
-
-          {/* Footer note if no TMDB key */}
-          {!TMDB_KEY && (
-            <div className="px-4 py-3 border-t border-white/5">
-              <p className="text-[11px] text-gray-600 leading-relaxed">
-                Add <span className="text-gray-400 font-mono">VITE_TMDB_API_KEY</span> to <span className="text-gray-400">.env</span> to enable trending features.
-              </p>
-            </div>
-          )}
         </div>
       )}
 
