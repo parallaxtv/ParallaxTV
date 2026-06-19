@@ -1,6 +1,10 @@
 # ParallaxTV
 
 <p align="center">
+  <img src="./banner.png" alt="ParallaxTV Banner" />
+</p>
+
+<p align="center">
   <img src="./src/assets/parallaxtv_logo.svg" width="120" alt="ParallaxTV Logo" />
 </p>
 
@@ -18,7 +22,17 @@ Built with Tauri, React, TypeScript and MPV
   <img src="https://img.shields.io/badge/jellyfin-supported-00A4DC" />
   <img src="https://img.shields.io/badge/tauri-v2-purple" />
   <img src="https://img.shields.io/badge/react-19-61DAFB" />
+  <img src="https://img.shields.io/badge/license-AGPL--3.0-green" />
 </p>
+
+---
+
+> [!WARNING]
+> ParallaxTV is currently in Alpha.
+>
+> Features may change, bugs may exist, and breaking changes can occur between releases.
+>
+> Feedback, bug reports, and feature suggestions are highly encouraged.
 
 ---
 
@@ -28,7 +42,7 @@ ParallaxTV is a modern desktop client for Jellyfin designed to provide a premium
 
 Unlike traditional web-based Jellyfin clients, ParallaxTV uses a native MPV playback engine through Tauri, allowing smooth playback of high bitrate media, anime, movies, and TV shows.
 
-This project was created by a Jellyfin user who wanted a faster, more polished experience while keeping complete compatibility with self-hosted media libraries.
+The goal is to combine the flexibility of Jellyfin with the polish and responsiveness expected from modern streaming applications.
 
 ---
 
@@ -36,80 +50,111 @@ This project was created by a Jellyfin user who wanted a faster, more polished e
 
 ### Native MPV Playback
 
-- Native MPV player integration
-- Hardware accelerated playback
-- HEVC / H.265 support
-- High bitrate support
-- Direct Play support
-- Server transcoding support
-- Audio track switching
-- Subtitle switching
-- Playback speed controls
-- Fullscreen support
+* Native MPV player integration
+* Hardware accelerated playback
+* HEVC / H.265 support
+* High bitrate support
+* Direct Play support
+* Server transcoding support
+* Audio track switching
+* Subtitle switching
+* Playback speed controls
+* Fullscreen support
 
 ---
 
 ### Smart TV Experience
 
-- Continue Watching
-- Up Next episodes
-- Watch History
-- Favorites
-- Resume playback
-- Episode progress tracking
-- Automatic playback reporting to Jellyfin
+* Continue Watching
+* Up Next episodes
+* Watch History
+* Favorites
+* Resume playback
+* Episode progress tracking
+* Automatic playback reporting to Jellyfin
+* Separate episode progress indicators
 
 ---
 
 ### Anime Features
 
-- AniList integration
-- Anime discovery
-- Voice actor information
-- Anime recommendations
-- Trailer support
-- Anime cast pages
+* AniList integration
+* Anime discovery
+* Voice actor information
+* Anime recommendations
+* Trailer support
+* Anime cast pages
+* Enhanced anime metadata
 
 ---
 
 ### Discovery System
 
-- Trending content
-- Recommended content
-- Because You Watched
-- Genre-based discovery
-- Similar content suggestions
+* Trending content
+* Recommended content
+* Because You Watched
+* Genre-based discovery
+* Similar content suggestions
+* Dynamic recommendation rows
 
 ---
 
 ### Advanced Playback Features
 
-- Intro detection
-- Outro detection
-- Recap detection
-- Skip Intro
-- Skip Outro
-- Auto Skip
-- Next Episode countdown
-- Trickplay previews
-- Playback statistics overlay
-- Keyboard shortcuts overlay
+* Intro detection
+* Outro detection
+* Recap detection
+* Skip Intro
+* Skip Outro
+* Auto Skip
+* Next Episode countdown
+* Trickplay previews
+* Playback statistics overlay
+* Keyboard shortcuts overlay
 
 ---
 
 ### Settings
 
-- Appearance settings
-- Playback settings
-- Discovery settings
-- Jellyfin settings
-- Keyboard shortcut reference
+* Appearance settings
+* Playback settings
+* Discovery settings
+* Jellyfin settings
+* Keyboard shortcut reference
 
 ---
 
-## Screenshots
+## Current Project Structure
 
-Coming Soon
+### Media Experience
+
+* Dashboard
+* Details Page
+* Person Page
+* Library
+* Favorites
+* Discovery
+* Recommendations
+
+### Player
+
+* Native MPV Integration
+* Episode Browser
+* Player Settings
+* Intro Skip
+* Outro Skip
+* Next Episode Overlay
+* Playback Statistics
+* Keyboard Shortcuts Overlay
+
+### Settings
+
+* Appearance
+* Playback
+* Discovery
+* Jellyfin
+* Keyboard Shortcuts
+* About
 
 ---
 
@@ -117,33 +162,32 @@ Coming Soon
 
 ### Frontend
 
-- React
-- TypeScript
-- Vite
-- TailwindCSS
-- Zustand
+* React
+* TypeScript
+* Vite
+* Zustand
 
 ### Desktop Framework
 
-- Tauri v2
+* Tauri v2
 
 ### Playback Engine
 
-- MPV
+* MPV
 
 ### Media Server
 
-- Jellyfin
+* Jellyfin
 
 ### Anime Metadata
 
-- AniList
-- Jikan
+* AniList
+* Jikan
 
 ### Backend Services
 
-- Cloudflare Workers
-- Cloudflare KV
+* Cloudflare Workers
+* Cloudflare KV
 
 ---
 
@@ -151,22 +195,20 @@ Coming Soon
 
 ### Version
 
-```txt
 v0.1.0-alpha
-```
 
 ### Development Status
 
-ParallaxTV is currently in active development.
+ParallaxTV is actively developed and already provides a functional media experience.
 
-The project is usable but should be considered Alpha software.
+The project is considered Alpha software and may contain bugs or unfinished features.
 
 Expect:
 
-- Bugs
-- Missing features
-- UI changes
-- Breaking changes between versions
+* Bugs
+* Missing features
+* UI refinements
+* Breaking changes between releases
 
 ---
 
@@ -174,34 +216,32 @@ Expect:
 
 ### Prerequisites
 
-- Jellyfin Server
-- Windows 10 or Windows 11
-- Node.js 20+
-- Rust
-- Tauri v2
+* Jellyfin Server
+* Windows 10 or Windows 11
+* Node.js 20+
+* Rust
+* Tauri v2
 
-### Development
-
-Clone the repository:
+### Clone Repository
 
 ```bash
 git clone https://github.com/parallaxtv/ParallaxTV.git
 cd ParallaxTV
 ```
 
-Install dependencies:
+### Install Dependencies
 
 ```bash
 npm install
 ```
 
-Run development mode:
+### Development
 
 ```bash
 npm run tauri dev
 ```
 
-Build production version:
+### Production Build
 
 ```bash
 npm run tauri build
@@ -213,29 +253,36 @@ npm run tauri build
 
 ### v0.1.x
 
-- [x] Native MPV playback
-- [x] Continue Watching
-- [x] Favorites
-- [x] Discovery System
-- [x] Anime Integration
-- [x] Settings Page
-- [x] Intro Skip
-- [x] Outro Skip
+* [x] Native MPV Playback
+* [x] Continue Watching
+* [x] Up Next
+* [x] Favorites
+* [x] Discovery System
+* [x] Anime Integration
+* [x] Details Page Refactor
+* [x] Settings Page
+* [x] Intro Skip
+* [x] Outro Skip
+* [x] Next Episode Overlay
+* [x] Playback Statistics
 
 ### v0.2.x
 
-- [ ] Enhanced Search
-- [ ] User Profile Page
-- [ ] Viewing Statistics
-- [ ] Collection Support
-- [ ] Better Recommendation Engine
+* [ ] User Profiles
+* [ ] Kids Profiles
+* [ ] Anime Profiles
+* [ ] Viewing Statistics
+* [ ] Enhanced Search
+* [ ] Better Recommendation Engine
+* [ ] Multi-user Enhancements
 
 ### v0.3.x
 
-- [ ] Download Manager
-- [ ] Offline Playback
-- [ ] Mobile Companion App
-- [ ] Additional Discovery Providers
+* [ ] Download Manager
+* [ ] Offline Playback
+* [ ] Mobile Companion App
+* [ ] Additional Discovery Providers
+* [ ] Sync Features
 
 ---
 
@@ -243,12 +290,15 @@ npm run tauri build
 
 Contributions are welcome.
 
-If you find a bug or have a feature request:
+If you find a bug or have an idea for improving ParallaxTV:
 
 1. Open an Issue
-2. Describe the problem
-3. Include screenshots if possible
-4. Include reproduction steps
+2. Describe the problem clearly
+3. Include screenshots if applicable
+4. Provide reproduction steps
+5. Suggest improvements when possible
+
+Please check existing issues before creating duplicates.
 
 ---
 
@@ -256,18 +306,19 @@ If you find a bug or have a feature request:
 
 We are actively looking for feedback from:
 
-- Jellyfin users
-- Anime fans
-- Self-hosting enthusiasts
-- Media server operators
+* Jellyfin users
+* Anime fans
+* Self-hosting enthusiasts
+* Media server operators
+* Desktop application users
 
-Please use GitHub Issues and Discussions to share feedback.
+Please use GitHub Issues and Discussions to share feedback, report bugs, and suggest features.
 
 ---
 
 ## Disclaimer
 
-ParallaxTV is an independent project and is not affiliated with the Jellyfin Project.
+ParallaxTV is an independent community project and is not affiliated with, endorsed by, or officially connected to the Jellyfin Project.
 
 Jellyfin is a trademark of the Jellyfin Project.
 
@@ -275,7 +326,30 @@ Jellyfin is a trademark of the Jellyfin Project.
 
 ## License
 
-License will be finalized before the first public release.
+ParallaxTV is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+
+You are free to:
+
+* Use
+* Study
+* Modify
+* Distribute
+
+the source code under the terms of the AGPL-3.0 license.
+
+See the LICENSE file for full details.
+
+---
+
+## Trademark Notice
+
+The ParallaxTV name, logo, branding, artwork, visual identity, and related assets are property of the ParallaxTV project.
+
+The source code is licensed under AGPL-3.0.
+
+Forks and derivative works may not use the ParallaxTV name, logo, branding, or visual assets in a way that implies affiliation with or endorsement by the ParallaxTV project without explicit permission.
+
+Please choose a different name and branding for public forks and redistributions.
 
 ---
 
@@ -283,20 +357,27 @@ License will be finalized before the first public release.
 
 Special thanks to:
 
-- Jellyfin Team
-- MPV Project
-- AniList
-- Tauri Team
-- React Team
-- Open Source Community
+* Jellyfin Team
+* MPV Project
+* AniList
+* Jikan
+* Tauri Team
+* React Team
+* Open Source Community
 
 ---
 
-## Star History
+## Support The Project
 
-If you enjoy ParallaxTV, consider starring the repository.
+If you enjoy ParallaxTV:
 
-It helps the project grow and motivates future development.
+* Star the repository
+* Report bugs
+* Suggest features
+* Share feedback
+* Contribute improvements
+
+Community feedback helps shape the future of the project.
 
 ---
 
