@@ -34,11 +34,11 @@ Built with Tauri, React, TypeScript and MPV
 
 ## Overview
 
-ParallaxTV is a modern desktop client for Jellyfin designed to provide a premium streaming experience with a focus on performance, beautiful UI, and powerful playback features.
+ParallaxTV is a premium open-source Jellyfin desktop client focused on performance, beautiful design, and a modern streaming experience.
 
-Unlike traditional web-based Jellyfin clients, ParallaxTV uses a native MPV playback engine through Tauri, allowing smooth playback of high bitrate media, anime, movies, and TV shows.
+Built with Tauri, React, TypeScript, and MPV, ParallaxTV combines the flexibility of Jellyfin with the responsiveness and polish expected from modern streaming applications.
 
-The goal is to combine the flexibility of Jellyfin with the polish and responsiveness expected from modern streaming applications.
+Unlike traditional browser-based clients, ParallaxTV uses native MPV playback to provide smooth playback of high bitrate media, anime, movies, and TV shows.
 
 ---
 
@@ -57,8 +57,6 @@ The goal is to combine the flexibility of Jellyfin with the polish and responsiv
 * Playback speed controls
 * Fullscreen support
 
----
-
 ### Smart TV Experience
 
 * Continue Watching
@@ -68,9 +66,7 @@ The goal is to combine the flexibility of Jellyfin with the polish and responsiv
 * Resume playback
 * Episode progress tracking
 * Automatic playback reporting to Jellyfin
-* Separate episode progress indicators
-
----
+* Smart playback resume
 
 ### Anime Features
 
@@ -82,8 +78,6 @@ The goal is to combine the flexibility of Jellyfin with the polish and responsiv
 * Anime cast pages
 * Enhanced anime metadata
 
----
-
 ### Discovery System
 
 * Trending content
@@ -92,8 +86,6 @@ The goal is to combine the flexibility of Jellyfin with the polish and responsiv
 * Genre-based discovery
 * Similar content suggestions
 * Dynamic recommendation rows
-
----
 
 ### Advanced Playback Features
 
@@ -108,49 +100,31 @@ The goal is to combine the flexibility of Jellyfin with the polish and responsiv
 * Playback statistics overlay
 * Keyboard shortcuts overlay
 
----
-
 ### Settings
 
 * Appearance settings
 * Playback settings
 * Discovery settings
 * Jellyfin settings
-* Keyboard shortcut reference
+* About page
 
 ---
 
-## Current Project Structure
+## Download
 
-### Media Experience
+Prebuilt Windows installers are available through GitHub Releases.
 
-* Dashboard
-* Details Page
-* Person Page
-* Library
-* Favorites
-* Discovery
-* Recommendations
+Latest release:
 
-### Player
+https://github.com/parallaxtv/ParallaxTV/releases
 
-* Native MPV Integration
-* Episode Browser
-* Player Settings
-* Intro Skip
-* Outro Skip
-* Next Episode Overlay
-* Playback Statistics
-* Keyboard Shortcuts Overlay
+Recommended:
 
-### Settings
+* NSIS Installer (.exe)
 
-* Appearance
-* Playback
-* Discovery
-* Jellyfin
-* Keyboard Shortcuts
-* About
+Alternative:
+
+* MSI Installer (.msi)
 
 ---
 
@@ -197,7 +171,7 @@ v0.1.0-alpha
 
 ParallaxTV is actively developed and already provides a functional media experience.
 
-The project is considered Alpha software and may contain bugs or unfinished features.
+The project is currently Alpha software and may contain bugs or unfinished features.
 
 Expect:
 
@@ -270,13 +244,11 @@ npm run tauri build
 * [ ] Viewing Statistics
 * [ ] Enhanced Search
 * [ ] Better Recommendation Engine
-* [ ] Multi-user Enhancements
 
-### v0.3.x
+### Future
 
 * [ ] Download Manager
 * [ ] Offline Playback
-* [ ] Mobile Companion App
 * [ ] Additional Discovery Providers
 * [ ] Sync Features
 
@@ -290,9 +262,8 @@ If you find a bug or have an idea for improving ParallaxTV:
 
 1. Open an Issue
 2. Describe the problem clearly
-3. Include screenshots if applicable
-4. Provide reproduction steps
-5. Suggest improvements when possible
+3. Include reproduction steps
+4. Suggest improvements when possible
 
 Please check existing issues before creating duplicates.
 
@@ -309,6 +280,34 @@ We are actively looking for feedback from:
 * Desktop application users
 
 Please use GitHub Issues and Discussions to share feedback, report bugs, and suggest features.
+
+---
+
+## Community
+
+### GitHub
+
+https://github.com/parallaxtv/ParallaxTV
+
+### Discussions
+
+https://github.com/parallaxtv/ParallaxTV/discussions
+
+---
+
+## Support Development
+
+If you enjoy ParallaxTV and would like to support future development:
+
+https://ko-fi.com/iitzmyung
+
+Support helps fund development, testing hardware, software licenses, hosting costs, and future improvements.
+
+---
+
+## Created By
+
+ParallaxTV is created and maintained by iiTzMYUNG.
 
 ---
 
@@ -360,20 +359,6 @@ Special thanks to:
 * Tauri Team
 * React Team
 * Open Source Community
-
----
-
-## Support The Project
-
-If you enjoy ParallaxTV:
-
-* Star the repository
-* Report bugs
-* Suggest features
-* Share feedback
-* Contribute improvements
-
-Community feedback helps shape the future of the project.
 
 ---
 
