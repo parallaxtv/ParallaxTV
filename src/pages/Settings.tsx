@@ -57,7 +57,7 @@ export function Settings({ authData, onLogout }: { authData: AuthData; onLogout:
       <aside className="w-60 flex-shrink-0 border-r border-white/6 flex flex-col">
 
         {/* Back to dashboard */}
-        <div className="px-5 pt-6 pb-4">
+        <div className="px-5 pt-14 pb-4">
           <button
             onClick={() => navigate("/")}
             className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors text-sm group"
@@ -107,7 +107,7 @@ export function Settings({ authData, onLogout }: { authData: AuthData; onLogout:
 
       {/* ── Content ── */}
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto px-10 py-10">
+        <div className="max-w-2xl mx-auto px-10 pt-14 pb-10">
           <h2 className="text-2xl font-black text-white mb-8">{activeLabel}</h2>
           <div key={activeSection} className="animate-[fadeIn_0.15s_ease-out]">
             {renderSection()}

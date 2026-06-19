@@ -3,3 +3,18 @@
 html, body {
     background: transparent;
 }
+
+/* Hide native scrollbar everywhere — removes the thin scrollbar strip
+   on the right edge of the window (rows use their own overflow-x scroll) */
+html, body {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* old Edge/IE */
+    overscroll-behavior: none; /* stop rubber-band scroll revealing edges */
+}
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+        display: none; /* Chrome/Safari/Tauri webview */
+        width: 0;
+        height: 0;
+    }

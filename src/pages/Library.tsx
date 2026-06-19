@@ -73,7 +73,7 @@ function LibraryHero({
       <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-black/70 to-transparent z-10 pointer-events-none" />
 
       {/* Top bar */}
-      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-12 py-6">
+      <div className="absolute top-8 left-0 right-0 z-20 flex items-center justify-between px-12 py-6">
         <button
           onClick={() => window.history.back()}
           className="flex items-center gap-2 text-sm font-semibold text-white/70 hover:text-white

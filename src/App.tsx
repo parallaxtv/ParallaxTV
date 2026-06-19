@@ -6,7 +6,7 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
-import { init } from "tauri-plugin-libmpv-api";
+import { destroy, init, type MpvObservableProperty } from "tauri-plugin-libmpv-api";
 import { Login } from "./pages/Login";
 import { Dashboard } from "./pages/Dashboard";
 import { Details } from "./pages/Details";
@@ -16,6 +16,8 @@ import { PersonPage } from "./pages/PersonPage";
 import { Settings } from "./pages/Settings";
 import { useAuthStore } from "./store/auth";
 import { useSettings } from "./store/settings";
+import { TitleBar } from "./components/ui/TitleBar";
+import { stopMpvEventListener } from "./lib/mpvEvents";
 import "./App.css";
 
 const fadeInStyle = `
@@ -24,6 +26,20 @@ const fadeInStyle = `
   to   { opacity: 1; transform: translateY(0); }
 }
 `;
+
+const MPV_OBSERVED_PROPERTIES = [
+  ["pause", "flag"],
+  ["time-pos", "double", "none"],
+  ["duration", "double", "none"],
+  ["fullscreen", "flag"],
+  ["estimated-vf-fps", "double", "none"],
+  ["vo-drop-frame-count", "int64", "none"],
+  ["video-format", "string", "none"],
+  ["audio-codec-name", "string", "none"],
+  ["width", "int64", "none"],
+  ["height", "int64", "none"],
+  ["hwdec-current", "string", "none"],
+] as const satisfies MpvObservableProperty[];
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -35,38 +51,91 @@ function ScrollToTop() {
   return null;
 }
 
-// ── MPV SINGLETON ─────────────────────────────────────────────────────────────
-
-let _mpvReady = false;
-const _mpvReadyCallbacks: (() => void)[] = [];
-
-export function onMpvReady(cb: () => void) {
-  if (_mpvReady) { cb(); return; }
-  _mpvReadyCallbacks.push(cb);
+function AppTitleBar() {
+  const { pathname } = useLocation();
+  if (pathname.startsWith("/play/")) return null;
+  return <TitleBar />;
 }
 
-init({
-  initialOptions: {
-    vo: "gpu-next",
-    hwdec: "auto-safe",
-    "keep-open": "yes",
-    "force-window": "yes",
-    "input-default-bindings": "no",
-    "input-vo-keyboard": "no",
-  },
-  observedProperties: [
-    ["pause", "flag"],
-    ["time-pos", "double", "none"],
-    ["duration", "double", "none"],
-  ],
-})
-  .then(() => {
-    console.log("[MPV] Ready");
-    _mpvReady = true;
-    _mpvReadyCallbacks.forEach((cb) => cb());
-    _mpvReadyCallbacks.length = 0;
+// ── MPV SINGLETON ─────────────────────────────────────────────────────────────
+
+type MpvState = {
+  initialized: boolean;
+  ready: boolean;
+  starting: Promise<void> | null;
+  callbacks: Set<() => void>;
+};
+
+const _w = window as Window & { __parallax_mpv?: MpvState };
+const _mpv = (_w.__parallax_mpv ??= {
+  initialized: false,
+  ready: false,
+  starting: null,
+  callbacks: new Set(),
+});
+
+export function onMpvReady(cb: () => void) {
+  if (_mpv.ready) {
+    cb();
+    return () => {};
+  }
+
+  _mpv.callbacks.add(cb);
+  return () => {
+    _mpv.callbacks.delete(cb);
+  };
+}
+
+export function ensureMpvReady() {
+  if (_mpv.ready) return Promise.resolve();
+  if (_mpv.starting) return _mpv.starting;
+
+  _mpv.initialized = true;
+  _mpv.starting = init({
+    initialOptions: {
+      vo: "gpu-next",
+      hwdec: "auto-safe",
+      "keep-open": "yes",
+      "force-window": "yes",
+      "input-default-bindings": "no",
+      "input-vo-keyboard": "no",
+    },
+    observedProperties: MPV_OBSERVED_PROPERTIES,
   })
-  .catch((e) => console.error("[MPV] Init failed", e));
+    .then(() => {
+      console.log("[MPV] Ready");
+      _mpv.ready = true;
+      _mpv.callbacks.forEach((cb) => cb());
+      _mpv.callbacks.clear();
+    })
+    .catch((e) => {
+      _mpv.initialized = false;
+      console.error("[MPV] Init failed", e);
+      throw e;
+    })
+    .finally(() => {
+      _mpv.starting = null;
+    });
+
+  return _mpv.starting;
+}
+
+const cleanupMpvForReload = () => {
+  _mpv.callbacks.clear();
+  _mpv.ready = false;
+  _mpv.initialized = false;
+  stopMpvEventListener()
+    .catch(() => {})
+    .finally(() => {
+      destroy().catch(() => {});
+    });
+};
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(cleanupMpvForReload);
+}
+
+window.addEventListener("beforeunload", cleanupMpvForReload, { once: true });
 
 // ── AUTH GUARD ────────────────────────────────────────────────────────────────
 
@@ -103,6 +172,7 @@ export default function App() {
     <>
       <style>{fadeInStyle}</style>
       <BrowserRouter>
+        <AppTitleBar />
         <ThemeRoot />
         <ScrollToTop />
         <Routes>

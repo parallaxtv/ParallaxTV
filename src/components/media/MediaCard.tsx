@@ -4,6 +4,7 @@ import { MediaItem } from "../../types/media";
 import { formatRuntime } from "../../utils/time";
 import { getPrimaryImage, getBackdropImage } from "../../utils/images";
 import { isEpisode, isMovie } from "../../utils/media";
+import { FavoriteButton } from "../ui/FavoriteButton";
 
 // ─── Landscape card — Continue Watching ──────────────────────────────────────
 
@@ -125,6 +126,15 @@ export function PosterCard({ item, authData }: { item: MediaItem; authData: Auth
           </div>
         </div>
 
+        {/* Favorite toggle — top-right, visible on hover */}
+        <FavoriteButton
+          itemId={item.Id}
+          isFavorite={item.UserData?.IsFavorite ?? false}
+          authData={authData}
+          variant="card"
+          className="opacity-0 group-hover:opacity-100"
+        />
+
         {item.CommunityRating && (
           <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded-full z-10">
             <svg className="w-3 h-3 fill-yellow-400 flex-shrink-0" viewBox="0 0 24 24">
@@ -134,7 +144,7 @@ export function PosterCard({ item, authData }: { item: MediaItem; authData: Auth
           </div>
         )}
 
-        <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-gray-300 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider z-10">
+        <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-gray-300 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider z-10">
           {item.Type === "Series" ? "Show" : "Film"}
         </div>
       </div>
@@ -191,6 +201,15 @@ export function Top10Card({ item, rank, authData }: { item: MediaItem; rank: num
               <svg className="w-4 h-4 fill-black ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             </div>
           </div>
+
+          {/* Favorite toggle — top-right, visible on hover */}
+          <FavoriteButton
+            itemId={item.Id}
+            isFavorite={item.UserData?.IsFavorite ?? false}
+            authData={authData}
+            variant="card"
+            className="opacity-0 group-hover:opacity-100"
+          />
         </div>
       </div>
 

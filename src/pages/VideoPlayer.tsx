@@ -6,13 +6,12 @@ import { getItemsApi } from "@jellyfin/sdk/lib/utils/api/items-api";
 import { createJellyfinApi } from "../lib/jellyfinApi";
 import {
   MpvObservableProperty,
-  observeProperties,
-  listenEvents,
   command,
   setProperty,
   setVideoMarginRatio,
 } from "tauri-plugin-libmpv-api";
-import { onMpvReady } from "../App";
+import { ensureMpvReady, onMpvReady } from "../App";
+import { listenMpvEvents, observeMpvProperties } from "../lib/mpvEvents";
 
 // ─── SERVICES & COMPONENTS ────────────────────────────────────────────────────
 import { reportPlaybackProgress, reportPlaybackStopped } from "../services/jellyfin/playback";
@@ -22,6 +21,7 @@ import { PlayerControls } from "../player/controls/PlayerControls";
 import { NextEpisodeOverlay } from "../player/overlays/NextEpisodeOverlay";
 import { StatsOverlay } from "../player/overlays/StatsOverlay";
 import { ShortcutsOverlay } from "../player/overlays/ShortcutsOverlay";
+import { TitleBar } from "../components/ui/TitleBar";
 
 // ─── HOOKS ────────────────────────────────────────────────────────────────────
 import { useSkipSegments } from "../player/hooks/useSkipSegments";
@@ -45,6 +45,14 @@ export function VideoPlayer({ authData }: { authData: any }) {
   const item      = location.state?.item;
 
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+  const prev = document.documentElement.style.backgroundColor;
+  document.documentElement.style.backgroundColor = "transparent";
+  return () => {
+    document.documentElement.style.backgroundColor = prev;
+  };
+}, []);
 
   const {
     isPlaying,
@@ -175,11 +183,36 @@ export function VideoPlayer({ authData }: { authData: any }) {
     }
   }, [authData, item, mediaSourceId, sessionId, videoQuality]);
 
-  useEffect(() => { onMpvReady(() => setMpvReady(true)); }, []);
+  useEffect(() => {
+    let disposed = false;
+    const offReady = onMpvReady(() => {
+      if (!disposed) setMpvReady(true);
+    });
+
+    ensureMpvReady().catch((error) => {
+      if (!disposed) {
+        console.error("[MPV] Init failed", error);
+        setPlaybackError("Failed to initialize video playback.");
+        setIsBuffering(false);
+      }
+    });
+
+    return () => {
+      disposed = true;
+      offReady();
+    };
+  }, []);
 
   // ── SUBSCRIBE to MPV property changes ────────────────────────────────────
   useEffect(() => {
-    observeProperties(OBSERVED_PROPERTIES, ({ name, data }) => {
+    if (!mpvReady) return;
+
+    let disposed = false;
+    let unlisten: (() => void) | null = null;
+
+    unlisten = observeMpvProperties(OBSERVED_PROPERTIES, ({ name, data }) => {
+      if (disposed) return;
+
       switch (name) {
         case "pause": {
           const paused = data as boolean;
@@ -207,21 +240,19 @@ export function VideoPlayer({ authData }: { authData: any }) {
           break;
         }
       }
-    }).then((unlisten) => { unlistenRef.current = unlisten; }).catch(console.error);
-    return () => { unlistenRef.current?.(); };
-  }, []);
+    });
+    unlistenRef.current = unlisten;
 
-  useEffect(() => {
-    if (!mpvReady) return;
-    setVideoMarginRatio({ left: 0, right: 0, top: 0, bottom: 0 }).catch(console.error);
+    return () => {
+      disposed = true;
+      unlisten?.();
+      if (unlistenRef.current === unlisten) unlistenRef.current = null;
+    };
   }, [mpvReady]);
 
   useEffect(() => {
     if (!mpvReady) return;
-    const p = listenEvents((event: any) => {
-      if (event.event === "property-change" && event.name === "fullscreen") setFullscreen(!!event.data);
-    });
-    return () => { p.then((fn: any) => fn()).catch(() => {}); };
+    setVideoMarginRatio({ left: 0, right: 0, top: 0, bottom: 0 }).catch(console.error);
   }, [mpvReady]);
 
   // ── LOAD VIDEO once MPV is ready and mediaSourceId is known ──────────────
@@ -262,14 +293,19 @@ export function VideoPlayer({ authData }: { authData: any }) {
     setPlaybackError(""); 
     setNextCountdown(null);
 
+    let disposed = false;
+    let resumeTimer: ReturnType<typeof setTimeout> | null = null;
+    let unlistenFileLoaded: (() => void) | null = null;
+
     const load = async () => {
       const MAX_RETRIES = 10;
       const RETRY_DELAY = 300;
 
-      let unlistenFileLoaded: (() => void) | null = null;
-      unlistenFileLoaded = await listenEvents((event) => {
+      unlistenFileLoaded = listenMpvEvents((event) => {
+        if (disposed) return;
         if (event.event === "file-loaded") {
           unlistenFileLoaded?.();
+          unlistenFileLoaded = null;
           setIsBuffering(false);
           setPlaying(true);
 
@@ -281,21 +317,30 @@ export function VideoPlayer({ authData }: { authData: any }) {
             if (mpvSid > 0) command("set", ["sid", mpvSid]).catch(() => {});
           }
 
-          setTimeout(async () => { await setProperty("pause", false).catch(() => {}); }, 100);
+          resumeTimer = setTimeout(async () => {
+            if (!disposed) await setProperty("pause", false).catch(() => {});
+          }, 100);
         }
-      }).catch(() => null);
+      });
+
+      if (disposed) {
+        unlistenFileLoaded?.();
+        return;
+      }
 
       for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        if (disposed) return;
         try {
           const opts = startPos > 0 ? `start=${startPos}` : "";
           await command("loadfile", opts ? [url, "replace", "0", opts] : [url, "replace"]);
           return;
         } catch (e: any) {
           const msg = String(e);
-          if ((msg.includes("not found") || msg.includes("mpv instance")) && attempt < MAX_RETRIES - 1) {
+          if (!disposed && (msg.includes("not found") || msg.includes("mpv instance")) && attempt < MAX_RETRIES - 1) {
             await new Promise(r => setTimeout(r, RETRY_DELAY));
             continue;
           }
+          if (disposed) return;
           console.error("MPV load failed", e);
           unlistenFileLoaded?.();
           setPlaybackError("Failed to start playback.");
@@ -305,6 +350,11 @@ export function VideoPlayer({ authData }: { authData: any }) {
       }
     };
     load();
+    return () => {
+      disposed = true;
+      unlistenFileLoaded?.();
+      if (resumeTimer) clearTimeout(resumeTimer);
+    };
   }, [mpvReady, item?.Id, mediaSourceId, videoQuality]);
 
   useEffect(() => { hasLoaded.current = false; }, [item?.Id]);
@@ -385,7 +435,15 @@ export function VideoPlayer({ authData }: { authData: any }) {
     return () => clearInterval(interval);
   }, [item?.Id, authData, isPlaying]);
 
-  // ── EXIT ──────────────────────────────────────────────────────────────────
+  // ── MINIMIZE / EXIT ───────────────────────────────────────────────────────
+  const handleMinimize = async () => {
+    try {
+      await getCurrentWindow().minimize();
+    } catch (err) {
+      console.error("Minimize failed:", err);
+    }
+  };
+
   const handleExit = useCallback(async () => {
     const appWindow = getCurrentWindow();
     if (await appWindow.isFullscreen()) {
@@ -416,7 +474,7 @@ export function VideoPlayer({ authData }: { authData: any }) {
           const source = data.MediaSources[0];
           setMediaSourceId(source.Id);
 
-          // ── NEW: Grab the source video width for Quality Options ──
+          // ── Grab the source video width for Quality Options ──
           const video = source.MediaStreams?.find((s: any) => s.Type === "Video");
           if (video?.Width) setSourceWidth(video.Width);
           
@@ -593,19 +651,47 @@ export function VideoPlayer({ authData }: { authData: any }) {
 
   // ── FULLSCREEN ────────────────────────────────────────────────────────────
   const toggleFullscreen = async () => {
-    const appWindow = getCurrentWindow();
-    const nextFullscreen = !(await appWindow.isFullscreen());
-    await appWindow.setFullscreen(nextFullscreen);
-    setFullscreen(nextFullscreen);
+    try {
+      const appWindow = getCurrentWindow();
+      const isWindowFullscreen = await appWindow.isFullscreen();
+      
+      await appWindow.setFullscreen(!isWindowFullscreen);
+      setFullscreen(!isWindowFullscreen);
+    } catch (err) {
+      console.error("Fullscreen toggle failed:", err);
+    }
   };
 
   const exitFullscreen = async () => {
-    const appWindow = getCurrentWindow();
-    if (!(await appWindow.isFullscreen())) return false;
-    await appWindow.setFullscreen(false);
-    setFullscreen(false);
-    return true;
+    try {
+      const appWindow = getCurrentWindow();
+      if (!(await appWindow.isFullscreen())) {
+        return false;
+      }
+      await appWindow.setFullscreen(false);
+      setFullscreen(false);
+      return true;
+    } catch (err) {
+      console.error("Exit fullscreen failed:", err);
+      return false;
+    }
   };
+
+  useEffect(() => {
+    const syncFullscreen = async () => {
+      try {
+        const appWindow = getCurrentWindow();
+        setFullscreen(await appWindow.isFullscreen());
+      } catch (err) {
+        console.error("Failed to sync fullscreen state:", err);
+      }
+    };
+
+    syncFullscreen();
+
+    window.addEventListener("resize", syncFullscreen);
+    return () => window.removeEventListener("resize", syncFullscreen);
+  }, [setFullscreen]);
 
   // ── HIDE CONTROLS ─────────────────────────────────────────────────────────
   const handleMouseMove = () => {
@@ -634,6 +720,7 @@ export function VideoPlayer({ authData }: { authData: any }) {
         case "ArrowDown":  e.preventDefault(); { const v = Math.max(0, volume - 0.1); setVolume(v); setIsMuted(v === 0); setProperty("volume", v * 100); } break;
         case "m": case "M": toggleMute(); break;
         case "f": case "F": toggleFullscreen(); break;
+        case "-": case "_": e.preventDefault(); handleMinimize(); break;
         case "n": case "N": if (nextEpisode) playNextEpisode(); break;
         case "p": case "P": if (prevEpisode) playPrevEpisode(); break;
         case "s": case "S": e.preventDefault(); handleScreenshot(); break;
@@ -696,6 +783,14 @@ export function VideoPlayer({ authData }: { authData: any }) {
       onMouseMove={handleMouseMove}
       onMouseLeave={() => isPlaying && setShowControls(false)}
     >
+      {/* ── CONDITIONAL TITLE BAR ── */}
+      {!isFullscreen && (
+        <TitleBar 
+          isTransparent={true} 
+          className={showControls ? "opacity-100" : "opacity-0 pointer-events-none"} 
+        />
+      )}
+
       <div
         className="absolute inset-0 z-0"
         onClick={() => {

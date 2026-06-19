@@ -1,7 +1,8 @@
 // src/components/details/DetailsHero.tsx
 import { useNavigate } from "react-router-dom";
-import { PlayButton, GhostButton } from "../ui/Buttons";
+import { PlayButton } from "../ui/Buttons";
 import { StarRating } from "../ui/StarRating";
+import { FavoriteButton } from "../ui/FavoriteButton";
 import TrailerPlayer from "./TrailerPlayer";
 import logo from "../../assets/parallaxtv_logo.svg";
 
@@ -20,6 +21,8 @@ interface DetailsHeroProps {
   onPlay: () => void;
   onToggleWatched: (e: React.MouseEvent) => void;
   runtime: string | null;
+  // Favorites
+  isFavorite: boolean;
 }
 
 export default function DetailsHero({
@@ -35,13 +38,14 @@ export default function DetailsHero({
   onPlay,
   onToggleWatched,
   runtime,
+  isFavorite,
 }: DetailsHeroProps) {
   const navigate = useNavigate();
 
   return (
     <>
       {/* ── Floating header ─────────────────────────────────────────────── */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-10 pt-5 pb-10 bg-gradient-to-b from-black/70 to-transparent pointer-events-none">
+      <div className="fixed top-8 left-0 right-0 z-50 flex items-center justify-between px-10 pt-5 pb-10 bg-gradient-to-b from-black/70 to-transparent pointer-events-none">
         <button
           onClick={() => navigate(-1)}
           className="pointer-events-auto flex items-center gap-2 text-sm font-semibold text-white/80
@@ -148,7 +152,14 @@ export default function DetailsHero({
           {/* Action buttons */}
           <div className="flex items-center gap-3">
             <PlayButton large onClick={onPlay}>{playBtnText}</PlayButton>
-            <GhostButton large>My List</GhostButton>
+
+            {/* Favorite button */}
+            <FavoriteButton
+              itemId={item.Id}
+              isFavorite={isFavorite}
+              authData={authData}
+              variant="hero"
+            />
 
             {/* Trailer button with countdown ring */}
             {trailerKey && !showTrailer && (

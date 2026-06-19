@@ -105,7 +105,7 @@ export function Dashboard({ authData, onLogout }: { authData: AuthData; onLogout
       ${animationsEnabled ? "animate-[fadeIn_0.3s_ease-out]" : ""}`}>
 
       {/* Floating header */}
-      <div className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-12 py-5
+      <div className="fixed top-8 left-0 w-full z-50 flex items-center justify-between px-12 py-5
         bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
         <img
           src={logo}

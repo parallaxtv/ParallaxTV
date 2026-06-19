@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { observeProperties, MpvObservableProperty } from "tauri-plugin-libmpv-api";
+import type { MpvObservableProperty } from "tauri-plugin-libmpv-api";
+import { observeMpvProperties } from "../../lib/mpvEvents";
 
 const STAT_PROPERTIES = [
   ["estimated-vf-fps", "double", "none"],
-  ["vo-drop-frame-count", "int", "none"],
+  ["vo-drop-frame-count", "int64", "none"],
   ["video-format", "string", "none"],
   ["audio-codec-name", "string", "none"],
-  ["width", "int", "none"],
-  ["height", "int", "none"],
+  ["width", "int64", "none"],
+  ["height", "int64", "none"],
   ["hwdec-current", "string", "none"],
 ] as const satisfies MpvObservableProperty[];
 
@@ -24,10 +25,14 @@ export function usePlaybackStats(mpvReady: boolean) {
   useEffect(() => {
     if (!mpvReady) return;
 
+    let disposed = false;
+    let unlisten: (() => void) | null = null;
     let currentWidth = 0;
     let currentHeight = 0;
 
-    const p = observeProperties(STAT_PROPERTIES, ({ name, data }) => {
+    unlisten = observeMpvProperties(STAT_PROPERTIES, ({ name, data }) => {
+      if (disposed) return;
+
       setStats((prev) => {
         const next = { ...prev };
         if (name === "estimated-vf-fps") next.fps = Number(data) || 0;
@@ -48,7 +53,8 @@ export function usePlaybackStats(mpvReady: boolean) {
     });
 
     return () => {
-      p.then((unlisten) => unlisten()).catch(() => {});
+      disposed = true;
+      unlisten?.();
     };
   }, [mpvReady]);
 

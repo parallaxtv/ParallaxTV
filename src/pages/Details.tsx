@@ -107,6 +107,8 @@ export function Details({ authData }: { authData: any }) {
         onPlay={handleHeroPlay}
         onToggleWatched={handleToggleMainItemWatched}
         runtime={runtime}
+        // ── Favorites ──────────────────────────────────────────────────────
+        isFavorite={item.UserData?.IsFavorite ?? false}
       />
 
       <div className="px-12 pb-24 -mt-2 relative z-20">
