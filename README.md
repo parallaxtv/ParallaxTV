@@ -1,11 +1,7 @@
 # ParallaxTV
 
 <p align="center">
-  <img src="./banner.png" alt="ParallaxTV Banner" />
-</p>
-
-<p align="center">
-  <img src="./src/assets/parallaxtv_logo.svg" width="120" alt="ParallaxTV Logo" />
+  <img src="src/assets/banner.png" alt="ParallaxTV Banner" />
 </p>
 
 <h3 align="center">
