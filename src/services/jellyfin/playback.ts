@@ -1,4 +1,3 @@
-import { createJellyfinApi } from "../../lib/jellyfinApi";
 import { AuthData } from "../../types/auth";
 
 /**

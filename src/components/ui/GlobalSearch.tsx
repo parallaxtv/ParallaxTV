@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { getItemsApi } from "@jellyfin/sdk/lib/utils/api/items-api";
+import { createJellyfinApi } from "../../lib/jellyfinApi";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -121,7 +122,8 @@ export function GlobalSearch({ authData, open, onClose }: GlobalSearchProps) {
       if (!q.trim()) { setResults([]); setLoading(false); return; }
       setLoading(true);
       try {
-        const itemsApi = getItemsApi(authData.api);
+        const api = createJellyfinApi(authData.serverUrl, authData.token);
+        const itemsApi = getItemsApi(api);
         const res = await itemsApi.getItems({
           userId: authData.userId,
           searchTerm: q,

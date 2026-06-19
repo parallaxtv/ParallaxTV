@@ -1,7 +1,7 @@
 import { getItemsApi } from "@jellyfin/sdk/lib/utils/api/items-api";
 import { SortOrder } from "@jellyfin/sdk/lib/generated-client/models";
 import { createJellyfinApi } from "../../lib/jellyfinApi";
-import { AuthData } from "../jellyfin/items";
+import { AuthData } from "../../types/auth";
 
 const PARALLAX_API_URL = "https://parallax-api.parallaxtv-api.workers.dev/api/trending";
 const TMDB_CACHE_KEY = "parallax_tmdb_trending";

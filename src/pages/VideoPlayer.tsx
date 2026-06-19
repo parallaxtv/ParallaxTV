@@ -28,7 +28,7 @@ import { useSkipSegments } from "../player/hooks/useSkipSegments";
 import { usePlaybackStats } from "../player/hooks/usePlaybackStats";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
-import { MediaStream, SeasonInfo, EpisodeInfo } from "../../types/player";
+import { MediaStream, SeasonInfo, EpisodeInfo } from "../types/player";
 
 const END_COUNTDOWN_SECONDS = 15;
 const OUTRO_COUNTDOWN_SECONDS = 10;

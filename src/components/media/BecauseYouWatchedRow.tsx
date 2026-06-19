@@ -4,12 +4,11 @@ import { SortOrder } from "@jellyfin/sdk/lib/generated-client/models";
 import { MediaRow } from "./MediaRow";
 import { createJellyfinApi } from "../../lib/jellyfinApi";
 import { AuthData } from "../../types/auth";
-import { MediaItem } from "../../types/media";
 
 // Change authData: any to authData: AuthData
 export function BecauseYouWatchedRow({ authData, refreshKey }: { authData: AuthData; refreshKey?: number }) {
-  const [sourceItem, setSourceItem] = useState<MediaItem | null>(null); // CHANGED
-  const [items, setItems]           = useState<MediaItem[]>([]); // CHANGED
+  const [sourceItem, setSourceItem] = useState<any | null>(null);
+  const [items, setItems]           = useState<any[]>([]);
   const [loading, setLoading]       = useState(true);
 
   useEffect(() => {

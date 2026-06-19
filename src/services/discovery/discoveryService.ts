@@ -1,5 +1,4 @@
 import { DiscoveryItem, DiscoveryDetail } from "../../types/discovery";
-import { normalizeTitle } from "../../utils/titles";
 import { extractYoutubeKey } from "../../utils/trailers";
 
 const API = "https://parallax-api.parallaxtv-api.workers.dev";

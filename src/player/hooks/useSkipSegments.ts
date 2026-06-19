@@ -8,13 +8,14 @@ export function useSkipSegments(item: any, authData: AuthData | null, chapters: 
 
   useEffect(() => {
     if (!item || !authData) return;
+
+    const base = authData.serverUrl;
+    const token = authData.token;
     
     setIntroSegments([]);
     
     async function fetchSegments() {
       const id = item.Id; 
-      const base = authData.serverUrl; 
-      const token = authData.token;
       
       // 1. Try standard MediaSegments API
       try {

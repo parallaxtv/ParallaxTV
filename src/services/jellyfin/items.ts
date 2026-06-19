@@ -32,7 +32,7 @@ export async function getContinueWatching(authData: AuthData) {
     userId: authData.userId,
     limit: 20,
     imageTypes: ["Primary"],
-  });
+  } as any);
 
   return res.data.Items ?? [];
 }

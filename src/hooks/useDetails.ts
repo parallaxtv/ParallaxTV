@@ -1,5 +1,5 @@
 // hooks/useDetails.ts
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getItemsApi } from "@jellyfin/sdk/lib/utils/api/items-api";
 import { createJellyfinApi } from "../lib/jellyfinApi";
@@ -132,7 +132,8 @@ export function useDetails(routeItemId: string | undefined, authData: any, initi
           sortBy: ["SortName"],
           fields: ["UserData"] as any,
         });
-        if (res.data.Items?.length > 0) setSeasons(res.data.Items);
+        const seasonItems = res.data.Items ?? [];
+        if (seasonItems.length > 0) setSeasons(seasonItems);
       } catch (err) {
         console.error("Failed to fetch seasons", err);
       }
@@ -164,7 +165,7 @@ export function useDetails(routeItemId: string | undefined, authData: any, initi
           fields: ["Overview", "CommunityRating", "UserData"] as any,
           sortBy: ["IndexNumber"],
           imageTypes: ["Primary"],
-        });
+        } as any);
         if (res.data.Items) setEpisodes(res.data.Items);
       } catch (err) {
         console.error("Failed to fetch episodes", err);
@@ -191,7 +192,7 @@ export function useDetails(routeItemId: string | undefined, authData: any, initi
           sortOrder: ["Descending"],
           limit: 20,
           genreIds: genreIds.length > 0 ? genreIds : undefined,
-          fields: ["Overview", "CommunityRating", "Genres", "ImageTags", "BackdropImageTags"],
+          fields: ["Overview", "CommunityRating", "Genres", "ImageTags", "BackdropImageTags"] as any,
         });
         const filtered = (res.data.Items ?? []).filter((i: any) => i.Id !== item.Id);
         setMoreLikeThis(filtered.slice(0, 15));

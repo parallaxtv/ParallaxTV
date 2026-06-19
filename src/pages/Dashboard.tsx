@@ -35,7 +35,6 @@ export function Dashboard({ authData, onLogout }: { authData: AuthData; onLogout
   // ─── Settings ───────────────────────────────────────────────────────────────
   const {
     theme,
-    backdropBlur,
     animationsEnabled,
     showMovies,
     showAnime,

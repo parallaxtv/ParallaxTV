@@ -31,7 +31,7 @@ export function JellyfinSettings({
   const [cacheCleared, setCacheCleared] = useState(false);
 
   const serverUrl = authData?.serverUrl ?? "—";
-  const username  = authData?.username ?? authData?.userName ?? "—";
+  const username  = authData?.username ?? "—";
 
   function handleClearCache() {
     try {

@@ -45,30 +45,6 @@ query {
   }
 }`;
 
-// AniList query to find a single anime by title for title-matching
-const ANILIST_SEARCH_QUERY = `
-query ($search: String) {
-  Page(page: 1, perPage: 3) {
-    media(search: $search, type: ANIME, isAdult: false) {
-      id
-      title { english romaji native }
-      description(asHtml: false)
-      genres
-      averageScore
-      coverImage { extraLarge color }
-      bannerImage
-      studios(isMain: true) { nodes { name } }
-      characters(sort: [ROLE], perPage: 6) {
-        edges {
-          role
-          node { name { full } image { large } }
-          voiceActors(language: JAPANESE) { name { full } image { large } }
-        }
-      }
-    }
-  }
-}`;
-
 function stripHtml(html: string) {
   return html?.replace(/<[^>]*>/g, "").replace(/&[^;]+;/g, " ").trim() ?? "";
 }

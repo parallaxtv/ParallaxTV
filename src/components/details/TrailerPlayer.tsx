@@ -12,7 +12,7 @@ const embedUrl = (key: string, mute: boolean) =>
 
 function FullscreenOverlay({ trailerKey, containerRef, onClose }: {
   trailerKey: string;
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   onClose: () => void;
 }) {
   useEffect(() => {
