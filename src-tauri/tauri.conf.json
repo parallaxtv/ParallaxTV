@@ -3,12 +3,14 @@
   "productName": "ParallaxTV",
   "version": "0.1.0",
   "identifier": "com.parallaxtv.app",
+
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "npm run build",
     "frontendDist": "../dist"
   },
+
   "app": {
     "windows": [
       {
@@ -19,23 +21,46 @@
         "minHeight": 600,
         "maximized": true,
         "transparent": true,
-        "decorations": false
+        "decorations": false,
+        "resizable": true,
+        "fullscreen": true,
+        "focus": true,
+        "center": true
       }
     ],
+
     "security": {
       "csp": null
     }
   },
+
   "bundle": {
     "active": true,
     "targets": "all",
-    "resources": [ "lib/**/*" ],
+
+    "category": "Entertainment",
+
+    "shortDescription": "Premium Jellyfin Desktop Client",
+
+    "longDescription": "ParallaxTV is a premium Jellyfin desktop client built with Tauri, React, TypeScript and MPV. It provides fast native playback, anime discovery, favorites, continue watching, intro skipping, next episode autoplay and a modern streaming experience.",
+
+    "copyright": "© 2026 ParallaxTV",
+
+    "resources": [
+      "lib/**/*"
+    ],
+
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+
+    "windows": {
+      "digestAlgorithm": "sha256",
+      "timestampUrl": "http://timestamp.digicert.com"
+    }
   }
 }
