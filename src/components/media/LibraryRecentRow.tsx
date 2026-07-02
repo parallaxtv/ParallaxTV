@@ -9,7 +9,7 @@ import { AuthData } from "../../types/auth";
 // Libraries with no recent additions are silently skipped.
 
 interface LibraryRecentRowsProps {
-  authData: AuthData; // CHANGE THIS
+  authData: AuthData;
   // How many days counts as "recent". Default 60.
   recentDays?: number;
 }
@@ -45,11 +45,8 @@ export function LibraryRecentRows({ authData, recentDays = 60 }: LibraryRecentRo
         cutoff.setDate(cutoff.getDate() - recentDays);
 
         // 2. Fetch recently added for each library in parallel
-
-        // --- NEW CODE START ---
         const api = createJellyfinApi(authData.serverUrl, authData.token);
         const itemsApi = getItemsApi(api);
-        // --- NEW CODE END ---
 
         const results = await Promise.all(
           libraries.map(async (lib: any) => {
@@ -94,14 +91,25 @@ export function LibraryRecentRows({ authData, recentDays = 60 }: LibraryRecentRo
   return (
     <>
       {rows.map(row => (
-        <MediaRow
-          key={row.id}
-          title={`New in ${row.name}`}
-          items={row.items}
-          loading={false}
-          variant="poster"
-          authData={authData}
-        />
+        <div key={row.id} className="mb-10 relative group/row" style={{ animation: "rowFadeIn 0.4s ease-out both" }}>
+          
+          {/* ── Sub-section Header (Discovery Style) ── */}
+          <div className="flex items-baseline gap-3 mb-4">
+            <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white flex items-center gap-2.5">
+              <span className="w-3 h-px bg-[var(--color-accent)] inline-block shadow-[0_0_8px_var(--color-accent-glow)]" />
+              New in {row.name}
+            </h2>
+          </div>
+
+          <MediaRow
+            title=""
+            hideHeader // Hides the old default header inside MediaRow
+            items={row.items}
+            loading={false}
+            variant="poster"
+            authData={authData}
+          />
+        </div>
       ))}
     </>
   );

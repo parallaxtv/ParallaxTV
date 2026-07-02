@@ -47,12 +47,15 @@ export function VideoPlayer({ authData }: { authData: any }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-  const prev = document.documentElement.style.backgroundColor;
-  document.documentElement.style.backgroundColor = "transparent";
-  return () => {
-    document.documentElement.style.backgroundColor = prev;
-  };
-}, []);
+    const prevRootBg = document.documentElement.style.backgroundColor;
+    const prevBodyBg = document.body.style.backgroundColor;
+    document.documentElement.style.backgroundColor = "transparent";
+    document.body.style.backgroundColor = "transparent";
+    return () => {
+      document.documentElement.style.backgroundColor = prevRootBg;
+      document.body.style.backgroundColor = prevBodyBg;
+    };
+  }, []);
 
   const {
     isPlaying,
@@ -92,15 +95,13 @@ export function VideoPlayer({ authData }: { authData: any }) {
   useEffect(() => { selectedSubtitleRef.current = selectedSubtitle; }, [selectedSubtitle]);
   useEffect(() => { subtitleTracksRef.current = subtitleTracks; }, [subtitleTracks]);
 
-  // Initialize speed from localStorage
   const initialSpeed = useMemo(() => {
     try { return parseFloat(localStorage.getItem("jellyfin_playback_speed") || "1.0"); } 
     catch { return 1.0; }
   }, []);
   const [playbackSpeed,  setPlaybackSpeed]  = useState(initialSpeed);
-  
   const [videoQuality, setVideoQuality] = useState("auto");
-  const [sourceWidth, setSourceWidth] = useState(1920); // Default to 1080p
+  const [sourceWidth, setSourceWidth] = useState(1920);
 
   const [sessionId] = useState(() => Math.random().toString(36).substring(2, 10));
 
@@ -110,10 +111,7 @@ export function VideoPlayer({ authData }: { authData: any }) {
   const [logoFailed,      setLogoFailed]      = useState(false);
   const [showShortcuts,   setShowShortcuts]   = useState(false);
 
-  // Custom hook for Intro/Outro segments
   const { introSegments, activeSkipSegment, setActiveSkipSegment } = useSkipSegments(item, authData, chapters);
-
-  // ── STATS FOR NERDS ───────────────────────────────────────────────────────
   const [showStats, setShowStats] = useState(false);
   const playbackStats = usePlaybackStats(mpvReady);
 
@@ -142,7 +140,6 @@ export function VideoPlayer({ authData }: { authData: any }) {
     setCurrentMedia({ id: item.Id, title: item.Name, type: item.Type });
   }, [item, navigate, setCurrentMedia]);
 
-  // ── NEXT / PREV EPISODE ───────────────────────────────────────────────────
   const nextEpisode = useMemo(() => {
     if (item?.Type !== "Episode" || seriesEpisodes.length === 0) return null;
     const idx = seriesEpisodes.findIndex((ep) => ep.Id === item.Id);
@@ -155,10 +152,8 @@ export function VideoPlayer({ authData }: { authData: any }) {
     return idx > 0 ? seriesEpisodes[idx - 1] ?? null : null;
   }, [item, seriesEpisodes]);
 
-  // ── BUILD STREAM URL (Handles Transcoding) ────────────────────────────────
   const buildVideoUrl = useCallback(() => {
     if (!item || !authData) return "";
-    
     const q = QUALITY_OPTIONS.find(opt => opt.id === videoQuality);
     
     if (videoQuality === "auto" || !q?.bitrate) {
@@ -200,10 +195,10 @@ export function VideoPlayer({ authData }: { authData: any }) {
     return () => {
       disposed = true;
       offReady();
+      // Notice: we moved the forceful MPV stop command down to the Master Unmount Cleanup
     };
   }, []);
 
-  // ── SUBSCRIBE to MPV property changes ────────────────────────────────────
   useEffect(() => {
     if (!mpvReady) return;
 
@@ -212,7 +207,6 @@ export function VideoPlayer({ authData }: { authData: any }) {
 
     unlisten = observeMpvProperties(OBSERVED_PROPERTIES, ({ name, data }) => {
       if (disposed) return;
-
       switch (name) {
         case "pause": {
           const paused = data as boolean;
@@ -255,7 +249,6 @@ export function VideoPlayer({ authData }: { authData: any }) {
     setVideoMarginRatio({ left: 0, right: 0, top: 0, bottom: 0 }).catch(console.error);
   }, [mpvReady]);
 
-  // ── LOAD VIDEO once MPV is ready and mediaSourceId is known ──────────────
   const hasLoaded = useRef(false);
   const prevQualityRef = useRef(videoQuality);
 
@@ -309,7 +302,6 @@ export function VideoPlayer({ authData }: { authData: any }) {
           setIsBuffering(false);
           setPlaying(true);
 
-          // ── FIX: Force MPV to respect our Subtitle State instantly ──
           if (selectedSubtitleRef.current === null) {
             command("set", ["sid", "no"]).catch(() => {});
           } else {
@@ -411,11 +403,23 @@ export function VideoPlayer({ authData }: { authData: any }) {
     return () => clearInterval(interval);
   }, [durationSecs, nextCountdown, chapters]);
 
-  // ── SESSION REPORTING ─────────────────────────────────────────────────────
+
+  // ── SESSION REPORTING & UNMOUNT CLEANUP ─────────────────────────────────
+
+  // 1. Maintain fresh refs so our unmount closure always has the latest data
+  const unmountMeta = useRef({ item, authData, isPlaying, isMuted });
+  useEffect(() => { unmountMeta.current = { item, authData, isPlaying, isMuted }; }, [item, authData, isPlaying, isMuted]);
+
+  // 2. Safely report progress to server
   const reportProgress = useCallback(async (isStopping = false) => {
     if (!item || !authData || stoppedSent.current) return;
-    const ticks = Math.floor(currentTimeSecs.current * 10000000);
+    let ticks = Math.floor(currentTimeSecs.current * 10000000);
     
+    // Failsafe: Prevent sending 0 ticks if we are resuming and MPV hasn't fired the time-pos yet
+    if (ticks === 0 && item.UserData?.PlaybackPositionTicks > 0) {
+      ticks = item.UserData.PlaybackPositionTicks;
+    }
+
     try {
       if (isStopping) {
         stoppedSent.current = true;
@@ -428,12 +432,36 @@ export function VideoPlayer({ authData }: { authData: any }) {
     }
   }, [item, authData, isPlaying, isMuted]);
 
+  // 3. Periodic Progress Update (Only runs AFTER buffering finishes)
   useEffect(() => {
-    if (!item || !authData) return;
+    if (!item || !authData || isBuffering) return; 
     reportProgress(false);
     const interval = setInterval(() => { if (isPlaying) reportProgress(false); }, 10000);
     return () => clearInterval(interval);
-  }, [item?.Id, authData, isPlaying]);
+  }, [item?.Id, authData, isPlaying, isBuffering, reportProgress]);
+
+  // 4. MASTER UNMOUNT CLEANUP
+  // This triggers natively when React destroys the component (e.g., clicking a mouse back button)
+  useEffect(() => {
+    return () => {
+      const { item: uItem, authData: uAuth } = unmountMeta.current;
+      
+      // Fire-and-forget: Instantly halt MPV
+      setProperty("pause", true).catch(() => {});
+      command("stop", []).catch(() => {});
+      
+      // Fire-and-forget: Instantly tell Jellyfin server the video stopped
+      if (uItem && uAuth && !stoppedSent.current) {
+        stoppedSent.current = true;
+        let ticks = Math.floor(currentTimeSecs.current * 10000000);
+        if (ticks === 0 && uItem.UserData?.PlaybackPositionTicks > 0) {
+          ticks = uItem.UserData.PlaybackPositionTicks; // Restore the known resume position
+        }
+        reportPlaybackStopped(uAuth, uItem.Id, ticks).catch(console.error);
+      }
+    };
+  }, []);
+
 
   // ── MINIMIZE / EXIT ───────────────────────────────────────────────────────
   const handleMinimize = async () => {
@@ -445,18 +473,18 @@ export function VideoPlayer({ authData }: { authData: any }) {
   };
 
   const handleExit = useCallback(async () => {
-    const appWindow = getCurrentWindow();
-    if (await appWindow.isFullscreen()) {
-      await appWindow.setFullscreen(false);
-      setFullscreen(false);
-    }
+    try {
+      const appWindow = getCurrentWindow();
+      if (await appWindow.isFullscreen()) {
+        await appWindow.setFullscreen(false);
+        setFullscreen(false);
+      }
+    } catch {}
 
-    await setProperty("pause", true).catch(() => {});
-    setPlaying(false);
-    await reportProgress(true);
-    await command("stop", []).catch(() => {});
+    // No awaiting MPV stops or API calls here anymore!
+    // The navigate call instantly unmounts the component, seamlessly triggering the Master Cleanup above!
     navigate(-1);
-  }, [reportProgress, navigate, setFullscreen]);
+  }, [navigate, setFullscreen]);
 
   const handleExitRef      = useRef(handleExit);
   const playNextEpisodeRef = useRef<(() => void) | null>(null);
@@ -474,7 +502,6 @@ export function VideoPlayer({ authData }: { authData: any }) {
           const source = data.MediaSources[0];
           setMediaSourceId(source.Id);
 
-          // ── Grab the source video width for Quality Options ──
           const video = source.MediaStreams?.find((s: any) => s.Type === "Video");
           if (video?.Width) setSourceWidth(video.Width);
           
@@ -487,7 +514,6 @@ export function VideoPlayer({ authData }: { authData: any }) {
           const defaultAudio = audio.find((s: any) => s.Index === source.DefaultAudioStreamIndex) || audio[0];
           setSelectedAudio(defaultAudio?.Index ?? null);
 
-          // Read Jellyfin's Default Subtitle Preference
           const defaultSub = subs.find((s: any) => s.Index === source.DefaultSubtitleStreamIndex);
           setSelectedSubtitle(defaultSub?.Index ?? null);
         }
@@ -876,9 +902,9 @@ export function VideoPlayer({ authData }: { authData: any }) {
       />
 
       {/* ── CONTROLS OVERLAY ───────────────────────────────────────────────── */}
-      <div className={`absolute inset-0 flex flex-col justify-between transition-opacity duration-500 bg-gradient-to-t from-black/90 via-transparent to-black/60 pointer-events-none ${showControls ? "opacity-100" : "opacity-0"}`}>
+      <div className={`absolute inset-0 flex flex-col justify-between transition-opacity duration-500 bg-gradient-to-t from-black/10 via-transparent to-black/10 pointer-events-none ${showControls ? "opacity-100" : "opacity-0"}`}>
         <div className="flex items-start px-8 pt-8 pb-4 pointer-events-auto">
-          <button onClick={handleExit} className="text-white hover:text-red-500 transition-colors mr-6 mt-1">
+          <button onClick={handleExit} className="text-white hover:text-[#38bdf8] transition-colors mr-6 mt-1">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
           </button>
           <div className="flex flex-col justify-center">
@@ -959,8 +985,8 @@ export function VideoPlayer({ authData }: { authData: any }) {
                 return <div className={`absolute text-[10px] font-bold px-2 py-0.5 rounded-full pointer-events-none z-[56] whitespace-nowrap -translate-x-1/2 ${color}`} style={{ left: `${hoverPosition}%`, bottom: "-22px" }}>{label}</div>;
               })()}
 
-              <div className="absolute h-1.5 bg-red-600 rounded-full transition-all duration-100 z-[3]" style={{ width: `${progress}%` }} />
-              <div className="absolute h-3.5 w-3.5 bg-red-600 rounded-full z-[4] shadow-lg scale-0 group-hover:scale-100 transition-transform duration-200" style={{ left: `calc(${progress}% - 7px)` }} />
+              <div className="absolute h-1.5 bg-[#38bdf8] rounded-full transition-all duration-100 z-[3]" style={{ width: `${progress}%` }} />
+              <div className="absolute h-3.5 w-3.5 bg-[#38bdf8] rounded-full z-[4] shadow-lg scale-0 group-hover:scale-100 transition-transform duration-200" style={{ left: `calc(${progress}% - 7px)` }} />
             </div>
             <span className="text-white text-sm font-medium w-12">{duration}</span>
           </div>

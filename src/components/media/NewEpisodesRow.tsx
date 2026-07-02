@@ -58,12 +58,12 @@ function NewEpisodeCard({ item, authData }: { item: any; authData: AuthData }) {
 
         <div className="absolute inset-0 flex items-center justify-center
           opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-          <button onClick={playEpisode} className="w-12 h-12 bg-white hover:bg-white/90 rounded-full flex items-center justify-center shadow-2xl transition-transform hover:scale-110" title="Play">
-            <svg className="w-5 h-5 fill-black ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <button onClick={playEpisode} className="w-12 h-12 bg-[var(--color-accent)] hover:brightness-110 rounded-full flex items-center justify-center shadow-[0_0_20px_var(--color-accent-glow)] transition-transform hover:scale-110" title="Play">
+            <svg className="w-5 h-5 fill-white ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           </button>
         </div>
 
-        <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-black
+        <div className="absolute top-2 left-2 bg-[var(--color-accent)] text-white text-[10px] font-black
           px-2 py-0.5 rounded uppercase tracking-wider z-10 shadow-lg">
           New
         </div>

@@ -38,8 +38,8 @@ export default function DetailsRecommendations({ authData, items }: DetailsRecom
                 }}
               />
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/related:opacity-100 transition-opacity duration-200">
-                <div className="w-11 h-11 bg-white/90 rounded-full flex items-center justify-center shadow-xl">
-                  <svg className="w-5 h-5 fill-black ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                <div className="w-11 h-11 bg-[var(--color-accent)] rounded-full flex items-center justify-center shadow-[0_0_20px_var(--color-accent-glow)]">
+                  <svg className="w-5 h-5 fill-white ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                 </div>
               </div>
               {related.CommunityRating && (

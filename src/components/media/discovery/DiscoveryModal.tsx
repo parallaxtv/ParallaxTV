@@ -119,7 +119,7 @@ export function DiscoveryModal({
           {detailLoading ? (
             <div>
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
-                <span className="w-3 h-px bg-red-600 inline-block" />
+                <span className="w-3 h-px bg-[var(--color-accent)] inline-block shadow-[0_0_8px_var(--color-accent-glow)]" />
                 Cast
               </p>
               <div className="flex gap-3">
@@ -142,9 +142,9 @@ export function DiscoveryModal({
             {trailerKey ? (
               <button
                 onClick={onPlayTrailer}
-                className="flex items-center gap-2 bg-white text-black text-sm font-bold px-4 py-2 rounded-full hover:bg-white/90 transition-all shadow-lg"
+                className="flex items-center gap-2 bg-[var(--color-accent)] text-white text-sm font-bold px-4 py-2 rounded-full hover:brightness-110 transition-all shadow-[0_0_20px_var(--color-accent-glow)]"
               >
-                <svg className="w-4 h-4 fill-black flex-shrink-0" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 fill-white flex-shrink-0" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
                 Watch Trailer
@@ -177,7 +177,7 @@ export function DiscoveryModal({
           {detailData?.similar && detailData.similar.length > 0 && (
             <div className="pt-2">
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
-                <span className="w-3 h-px bg-red-600 inline-block" />
+                <span className="w-3 h-px bg-[var(--color-accent)] inline-block shadow-[0_0_8px_var(--color-accent-glow)]" />
                 More Like This
               </p>
               <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
@@ -187,7 +187,7 @@ export function DiscoveryModal({
                     className="flex-shrink-0 w-[90px] cursor-pointer group/sim"
                     onClick={() => onSimilarClick(s)}
                   >
-                    <div className="w-full h-[135px] rounded-lg overflow-hidden bg-white/5 mb-1.5 group-hover/sim:ring-1 group-hover/sim:ring-red-600 transition-all">
+                    <div className="w-full h-[135px] rounded-lg overflow-hidden bg-white/5 mb-1.5 group-hover/sim:ring-1 group-hover/sim:ring-[var(--color-accent)] transition-all">
                       <img
                         src={s.posterUrl || SAFE_PLACEHOLDER}
                         className="w-full h-full object-cover group-hover/sim:brightness-75 transition-all"

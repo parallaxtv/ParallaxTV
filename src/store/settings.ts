@@ -3,25 +3,29 @@ import { persist } from "zustand/middleware";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type Theme         = "dark" | "amoled" | "midnight";
+export type Theme          = "dark" | "amoled" | "midnight";
+export type AccentTheme    = "aurora" | "ocean" | "emerald" | "sunset" | "crimson" | (string & {});
 export type CardStyle     = "netflix" | "plex" | "compact";
 export type TrendingSource = "tmdb" | "anilist" | "combined";
+export type HeroContentType = "movies" | "shows" | "anime";
+export type HeroTimeRange = "all" | "month" | "6months" | "year";
 
 export interface SettingsState {
   // Appearance
-  theme:           Theme;
-  cardStyle:       CardStyle;
+  theme:             Theme;
+  accentTheme:       AccentTheme;
+  cardStyle:         CardStyle;
   animationsEnabled: boolean;
-  backdropBlur:    boolean;
+  backdropBlur:      boolean;
 
   // Playback
-  defaultVolume:      number;
-  autoPlayNext:       boolean;
-  autoSkipIntro:      boolean;
-  autoSkipOutro:      boolean;
-  rememberSpeed:      boolean;
+  defaultVolume:       number;
+  autoPlayNext:        boolean;
+  autoSkipIntro:       boolean;
+  autoSkipOutro:       boolean;
+  rememberSpeed:       boolean;
   defaultSubtitleLang: string;
-  defaultAudioLang:   string;
+  defaultAudioLang:    string;
 
   // Discovery
   trendingSource:    TrendingSource;
@@ -30,8 +34,17 @@ export interface SettingsState {
   showMovies:        boolean;
   hideNSFWAnime:     boolean;
 
+  // Hero Banner
+  heroMinRating:        number;            // 0 = no minimum
+  heroContentTypes:     HeroContentType[]; // which content types are eligible
+  heroLibraryIds:       string[];          // specific library IDs to include as fallbacks
+  heroUseFallbackLibraries: boolean;        // use only selected fallback libraries instead of auto content types
+  heroOnlyTrending:     boolean;           // restrict to high-rated "trending" pool only
+  heroTimeRange:        HeroTimeRange;     // only include titles released within this window
+
   // Actions
   setTheme:            (v: Theme) => void;
+  setAccentTheme:      (v: AccentTheme) => void;
   setCardStyle:        (v: CardStyle) => void;
   setAnimationsEnabled:(v: boolean) => void;
   setBackdropBlur:     (v: boolean) => void;
@@ -47,6 +60,12 @@ export interface SettingsState {
   setShowKDrama:       (v: boolean) => void;
   setShowMovies:       (v: boolean) => void;
   setHideNSFWAnime:    (v: boolean) => void;
+  setHeroMinRating:    (v: number) => void;
+  setHeroContentTypes: (v: HeroContentType[]) => void;
+  setHeroLibraryIds:   (v: string[]) => void;
+  setHeroUseFallbackLibraries: (v: boolean) => void;
+  setHeroOnlyTrending: (v: boolean) => void;
+  setHeroTimeRange:    (v: HeroTimeRange) => void;
   resetAll:            () => void;
 }
 
@@ -54,6 +73,7 @@ export interface SettingsState {
 
 const DEFAULTS = {
   theme:              "dark" as Theme,
+  accentTheme:        "ocean" as AccentTheme,
   cardStyle:          "netflix" as CardStyle,
   animationsEnabled:  true,
   backdropBlur:       true,
@@ -69,6 +89,12 @@ const DEFAULTS = {
   showKDrama:         true,
   showMovies:         true,
   hideNSFWAnime:      true,
+  heroMinRating:      0,
+  heroContentTypes:   ["movies", "shows", "anime"] as HeroContentType[],
+  heroLibraryIds:     [] as string[], // default empty
+  heroUseFallbackLibraries: false,
+  heroOnlyTrending:   false,
+  heroTimeRange:      "year" as HeroTimeRange,
 };
 
 // ─── Store ────────────────────────────────────────────────────────────────────
@@ -79,6 +105,7 @@ export const useSettings = create<SettingsState>()(
       ...DEFAULTS,
 
       setTheme:             (v) => set({ theme: v }),
+      setAccentTheme:       (v) => set({ accentTheme: v }),
       setCardStyle:         (v) => set({ cardStyle: v }),
       setAnimationsEnabled: (v) => set({ animationsEnabled: v }),
       setBackdropBlur:      (v) => set({ backdropBlur: v }),
@@ -94,6 +121,12 @@ export const useSettings = create<SettingsState>()(
       setShowKDrama:        (v) => set({ showKDrama: v }),
       setShowMovies:        (v) => set({ showMovies: v }),
       setHideNSFWAnime:     (v) => set({ hideNSFWAnime: v }),
+      setHeroMinRating:     (v) => set({ heroMinRating: v }),
+      setHeroContentTypes:  (v) => set({ heroContentTypes: v }),
+      setHeroLibraryIds:    (v) => set({ heroLibraryIds: v }),
+      setHeroUseFallbackLibraries: (v) => set({ heroUseFallbackLibraries: v }),
+      setHeroOnlyTrending:  (v) => set({ heroOnlyTrending: v }),
+      setHeroTimeRange:     (v) => set({ heroTimeRange: v }),
       resetAll:             () => set(DEFAULTS),
     }),
     { name: "parallaxtv-settings" }

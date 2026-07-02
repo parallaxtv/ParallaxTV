@@ -1,11 +1,7 @@
 import { useState } from "react";
-
 import { useNavigate } from "react-router-dom";
-
 import { getUserApi } from "@jellyfin/sdk/lib/utils/api/user-api";
-
 import { jellyfin } from "../lib/jellyfin";
-
 import { useAuthStore } from "../store/auth";
 
 // Logo
@@ -81,8 +77,9 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative px-4 bg-[#0d0d0d]">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_#1a0000_0%,_#0d0d0d_70%)]" />
+    <div className="min-h-screen flex flex-col items-center justify-center relative px-4 bg-[#0B0B0F]">
+      {/* Changed radial gradient to match the new blue accent theme */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(56,189,248,0.15)_0%,_#0B0B0F_70%)]" />
 
       <div className="relative z-10 flex flex-col items-center w-full max-w-[400px] animate-[fadeIn_0.5s_ease-out]">
         <img
@@ -110,7 +107,7 @@ export function Login() {
               setServerUrl(e.target.value)
             }
             placeholder="Server URL"
-            className="px-4 py-3 bg-white/6 border border-white/10 text-white placeholder-gray-600 rounded-xl focus:outline-none focus:ring-1 focus:ring-red-600/60 text-sm transition"
+            className="px-4 py-3 bg-white/6 border border-white/10 text-white placeholder-gray-600 rounded-xl focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/60 text-sm transition"
           />
 
           <input
@@ -120,7 +117,7 @@ export function Login() {
               setUsername(e.target.value)
             }
             placeholder="Username"
-            className="px-4 py-3 bg-white/6 border border-white/10 text-white placeholder-gray-600 rounded-xl focus:outline-none focus:ring-1 focus:ring-red-600/60 text-sm transition"
+            className="px-4 py-3 bg-white/6 border border-white/10 text-white placeholder-gray-600 rounded-xl focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/60 text-sm transition"
           />
 
           <input
@@ -130,7 +127,7 @@ export function Login() {
               setPassword(e.target.value)
             }
             placeholder="Password"
-            className="px-4 py-3 bg-white/6 border border-white/10 text-white placeholder-gray-600 rounded-xl focus:outline-none focus:ring-1 focus:ring-red-600/60 text-sm transition"
+            className="px-4 py-3 bg-white/6 border border-white/10 text-white placeholder-gray-600 rounded-xl focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/60 text-sm transition"
           />
 
           {status === "error" && (
@@ -139,9 +136,10 @@ export function Login() {
             </div>
           )}
 
+          {/* Changed button to use the new accent color and dark text for contrast */}
           <button
             disabled={status === "connecting"}
-            className="mt-1 bg-red-600 hover:bg-red-500 disabled:opacity-40 text-white font-bold py-3 rounded-xl transition-all active:scale-98 shadow-lg shadow-red-900/30"
+            className="mt-1 bg-[var(--color-accent)] hover:brightness-110 disabled:opacity-40 text-[#071017] font-bold py-3 rounded-xl transition-all active:scale-98 shadow-lg shadow-[var(--color-accent)]/20"
           >
             {status === "connecting"
               ? "Connecting..."

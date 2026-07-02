@@ -68,7 +68,7 @@ export function AboutSettings() {
       {/* Logo + version */}
       <div className="mb-8">
         <img src={logo} alt="ParallaxTV" className="h-10 w-auto mb-2" />
-        <p className="text-gray-600 text-sm">Version v0.1.0-alpha</p>
+        <p className="text-gray-600 text-sm">Version v0.1.1-alpha</p>
       </div>
 
       <SettingsSection title="About ParallaxTV">

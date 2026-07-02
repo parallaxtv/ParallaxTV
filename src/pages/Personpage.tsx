@@ -330,7 +330,7 @@ export function PersonPage({ authData }: { authData: any }) {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
           </svg>
-          Back
+          Browse
         </button>
         <img 
           src={logo} 
@@ -373,7 +373,7 @@ export function PersonPage({ authData }: { authData: any }) {
           {/* Info */}
           <div className="pb-2 flex-1">
             {professionsStr && (
-              <p className="text-red-500 text-xs font-bold uppercase tracking-[0.3em] mb-2 drop-shadow">
+              <p className="text-[var(--color-accent)] text-xs font-bold uppercase tracking-[0.3em] mb-2 drop-shadow">
                 {professionsStr}
               </p>
             )}
@@ -392,39 +392,126 @@ export function PersonPage({ authData }: { authData: any }) {
                 </>
               )}
             </div>
-
-            <ExpandableText text={activePerson.Overview} />
-
-            {!loading && (
-              <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mt-6">
-                {works.length} Title{works.length !== 1 ? "s" : ""} Available
-              </p>
-            )}
           </div>
         </div>
       </div>
 
-      {/* ── Filter pills ──────────────────────────────────────────────────── */}
-      <div className="px-12 pb-6 pt-4 flex items-center gap-3 relative z-10" style={{ animation: "fadeSlideUp 0.5s 0.15s ease-out both" }}>
-        {(["All", "Movie", "Series"] as const).map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-lg border
-              ${filter === f
-                ? "bg-white text-black border-white scale-105"
-                : "bg-white/5 text-gray-400 border-white/10 hover:bg-white/15 hover:text-white"
-              }`}
+      {/* ── Stat Strip ────────────────────────────────────────────────────── */}
+      {!loading && works.length > 0 && (
+        <div
+          className="px-12 py-6 relative z-10 border-y border-white/5"
+          style={{ animation: "fadeSlideUp 0.5s 0.1s ease-out both" }}
+        >
+          <div className="flex items-center gap-10">
+            <div className="flex flex-col">
+              <span className="text-3xl font-black text-white tabular-nums">{works.length}</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-0.5">Total Titles</span>
+            </div>
+            {works.filter(w => w.Type === "Movie").length > 0 && (
+              <>
+                <div className="w-px h-8 bg-white/10" />
+                <div className="flex flex-col">
+                  <span className="text-3xl font-black text-white tabular-nums">{works.filter(w => w.Type === "Movie").length}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-0.5">Movies</span>
+                </div>
+              </>
+            )}
+            {works.filter(w => w.Type === "Series").length > 0 && (
+              <>
+                <div className="w-px h-8 bg-white/10" />
+                <div className="flex flex-col">
+                  <span className="text-3xl font-black text-white tabular-nums">{works.filter(w => w.Type === "Series").length}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-0.5">Series</span>
+                </div>
+              </>
+            )}
+            {professionsStr && (
+              <>
+                <div className="w-px h-8 bg-white/10" />
+                <div className="flex flex-col">
+                  <span className="text-sm font-black text-white">{professionsStr}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-0.5">Role</span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Known For ─────────────────────────────────────────────────────── */}
+      {aniStaff !== "idle" && aniStaff !== null && aniStaff.roles.length > 0 && (
+        <div
+          className="px-12 pt-10 pb-4 relative z-10"
+          style={{ animation: "fadeSlideUp 0.5s 0.15s ease-out both" }}
+        >
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-500 mb-5">Known For</p>
+          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
+            {aniStaff.roles.slice(0, 8).map((role, i) => (
+              <div key={i} className="flex-shrink-0 w-[160px] group">
+                <div className="relative w-full h-[100px] rounded-xl overflow-hidden mb-2.5 bg-white/5">
+                  {role.charImage ? (
+                    <img
+                      src={role.charImage}
+                      alt={role.charName}
+                      className="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => { e.currentTarget.src = SAFE_PLACEHOLDER; }}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-white/5" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-2">
+                    <p className="text-white text-xs font-bold truncate leading-tight">{role.charName}</p>
+                  </div>
+                </div>
+                <p className="text-gray-400 text-[11px] truncate font-medium">{role.mediaTitle}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Biography ─────────────────────────────────────────────────────── */}
+      {(() => {
+        const bioText = aniStaff !== "idle" && aniStaff !== null && aniStaff.bio
+          ? aniStaff.bio
+          : activePerson.Overview;
+        if (!bioText) return null;
+        return (
+          <div
+            className="px-12 pt-8 pb-4 relative z-10"
+            style={{ animation: "fadeSlideUp 0.5s 0.2s ease-out both" }}
           >
-            {f === "All" ? `All (${works.length})` :
-             f === "Movie" ? `Movies (${works.filter(w => w.Type === "Movie").length})` :
-             `TV Shows (${works.filter(w => w.Type === "Series").length})`}
-          </button>
-        ))}
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-500 mb-3">Biography</p>
+            <ExpandableText text={bioText} />
+          </div>
+        );
+      })()}
+
+      {/* ── Filmography Header + Filter pills ─────────────────────────────── */}
+      <div className="px-12 pt-10 pb-3 relative z-10" style={{ animation: "fadeSlideUp 0.5s 0.25s ease-out both" }}>
+        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-500 mb-5">Filmography</p>
+        <div className="flex items-center gap-3">
+          {(["All", "Movie", "Series"] as const).map(f => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-lg border
+                ${filter === f
+                  ? "bg-white text-black border-white scale-105"
+                  : "bg-white/5 text-gray-400 border-white/10 hover:bg-white/15 hover:text-white"
+                }`}
+            >
+              {f === "All" ? `All Work (${works.length})` :
+               f === "Movie" ? `Movies (${works.filter(w => w.Type === "Movie").length})` :
+               `Series (${works.filter(w => w.Type === "Series").length})`}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── Works grid ────────────────────────────────────────────────────── */}
-      <div className="px-12 py-6 pb-24 relative z-10" style={{ animation: "fadeSlideUp 0.5s 0.25s ease-out both" }}>
+      <div className="px-12 py-6 pb-24 relative z-10" style={{ animation: "fadeSlideUp 0.5s 0.3s ease-out both" }}>
         {loading ? (
           <div className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))" }}>
             {Array.from({ length: 12 }).map((_, i) => (

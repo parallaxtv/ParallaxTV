@@ -5,7 +5,6 @@ import { MediaRow } from "./MediaRow";
 import { createJellyfinApi } from "../../lib/jellyfinApi";
 import { AuthData } from "../../types/auth";
 
-// Change authData: any to authData: AuthData
 export function BecauseYouWatchedRow({ authData, refreshKey }: { authData: AuthData; refreshKey?: number }) {
   const [sourceItem, setSourceItem] = useState<any | null>(null);
   const [items, setItems]           = useState<any[]>([]);
@@ -80,13 +79,27 @@ export function BecauseYouWatchedRow({ authData, refreshKey }: { authData: AuthD
   // If loading is done and we found no similar items (or haven't watched anything), hide the row completely.
   if (!loading && items.length === 0) return null;
 
+  const displayTitle = sourceItem ? `Because you watched ${sourceItem.Name}` : "Recommendations";
+
   return (
-    <MediaRow
-      title={sourceItem ? `Because you watched ${sourceItem.Name}` : "Recommendations"}
-      items={items}
-      loading={loading}
-      variant="poster"
-      authData={authData}
-    />
+    <div className="mb-10 relative group/row" style={{ animation: "rowFadeIn 0.4s ease-out both" }}>
+      
+      {/* ── Sub-section Header (Discovery Style) ── */}
+      <div className="flex items-baseline gap-3 mb-4">
+        <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white flex items-center gap-2.5">
+          <span className="w-3 h-px bg-[var(--color-accent)] inline-block shadow-[0_0_8px_var(--color-accent-glow)]" />
+          {displayTitle}
+        </h2>
+      </div>
+
+      <MediaRow
+        title=""
+        hideHeader // Hides the old default header inside MediaRow
+        items={items}
+        loading={loading}
+        variant="poster"
+        authData={authData}
+      />
+    </div>
   );
 }

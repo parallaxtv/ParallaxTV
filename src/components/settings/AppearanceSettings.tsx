@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useSettings } from "../../store/settings";
 import {
   SettingsSection, SettingsRow, RadioGroup, Toggle,
@@ -7,18 +8,23 @@ import {
 
 export function AppearanceSettings() {
   const {
-    theme,            setTheme,
-    cardStyle,        setCardStyle,
-    animationsEnabled,setAnimationsEnabled,
-    backdropBlur,     setBackdropBlur,
+    theme,             setTheme,
+    setAccentTheme,
+    cardStyle,         setCardStyle,
+    animationsEnabled, setAnimationsEnabled,
+    backdropBlur,      setBackdropBlur,
   } = useSettings();
+
+  useEffect(() => {
+    setAccentTheme("ocean");
+  }, [setAccentTheme]);
 
   return (
     <>
       <SettingsSection title="Theme">
         <SettingsRow
           label="Color scheme"
-          description="Controls the overall background darkness and accent tones"
+          description="Controls the overall background darkness"
         >
           <RadioGroup
             value={theme}
@@ -30,6 +36,7 @@ export function AppearanceSettings() {
             ]}
           />
         </SettingsRow>
+
       </SettingsSection>
 
       <SettingsSection title="Cards">

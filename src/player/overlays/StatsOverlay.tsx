@@ -21,7 +21,7 @@ export function StatsOverlay({ show, stats, playbackSpeed, audioTrackName, subti
 
   return (
     <div className="absolute top-8 right-8 bg-[#0a0a0a]/80 backdrop-blur-md border border-white/20 p-5 rounded-xl text-white font-mono text-[11px] z-50 pointer-events-none w-[320px] shadow-2xl animate-[fadeIn_0.15s_ease-out]">
-      <h3 className="font-bold text-red-500 mb-4 uppercase tracking-[0.2em] flex items-center gap-2">
+      <h3 className="font-bold text-[var(--color-accent)] mb-4 uppercase tracking-[0.2em] flex items-center gap-2">
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>

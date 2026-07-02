@@ -11,9 +11,10 @@ export function normTitle(t: string) {
   return t.toLowerCase().replace(/^(the |a |an )/i,"").replace(/[^a-z0-9\s]/g,"").replace(/\s+/g," ").trim();
 }
 
-export async function getTmdbTrending(): Promise<{ title: string; year: number | null; rank: number }[]> {
+export async function getTmdbTrending(range: "today" | "week" | "month" | "year" = "week"): Promise<{ title: string; year: number | null; rank: number }[]> {
+  const cacheKey = `${TMDB_CACHE_KEY}_${range}`;
   try {
-    const cached = localStorage.getItem(TMDB_CACHE_KEY);
+    const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const { timestamp, data } = JSON.parse(cached);
       if (Date.now() - timestamp < TMDB_CACHE_TTL) return data;
@@ -21,32 +22,34 @@ export async function getTmdbTrending(): Promise<{ title: string; year: number |
   } catch {}
 
   try {
-    const res = await fetch(PARALLAX_API_URL);
+    const url = `${PARALLAX_API_URL}?range=${encodeURIComponent(range)}`;
+    const res = await fetch(url);
     const json = await res.json();
     
     if (json.success && json.data) {
-      try { localStorage.setItem(TMDB_CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data: json.data })); } catch {}
+      try { localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: json.data })); } catch {}
       return json.data;
     }
     return [];
-  } catch {
-    console.error("Failed to fetch from Parallax API");
+  } catch (err) {
+    console.error("Failed to fetch from Parallax API", err);
     return []; 
   }
 }
 
-export async function getTop10TrendingInLibrary(authData: AuthData) {
+export async function getTop10TrendingInLibrary(authData: AuthData, range: "today" | "week" | "month" | "year" = "week") {
   const api = createJellyfinApi(authData.serverUrl, authData.token);
   const itemsApi = getItemsApi(api);
 
-  // Fetch a broad pool — sorted by DateCreated descending
+  // Fetch the ENTIRE library (not just the most recently added items) so trending
+  // matching can find titles regardless of when they were added to Jellyfin.
   const res = await itemsApi.getItems({
     userId: authData.userId,
     includeItemTypes: ["Movie", "Series"],
     recursive: true,
-    sortBy: ["DateCreated"],
-    sortOrder: [SortOrder.Descending] as any,
-    limit: 200,
+    sortBy: ["SortName"],
+    sortOrder: [SortOrder.Ascending] as any,
+    limit: 10000,
     fields: ["CommunityRating", "ImageTags", "ProductionYear", "Genres", "DateCreated"] as any,
   });
 
@@ -54,22 +57,22 @@ export async function getTop10TrendingInLibrary(authData: AuthData) {
   if (library.length === 0) return [];
 
   const now = Date.now();
-  const threeYearsMs  = 3 * 365 * 24 * 60 * 60 * 1000;
   const oneYearMs     = 1 * 365 * 24 * 60 * 60 * 1000;
 
   // Fetch from Cloudflare Worker
-  const trending = await getTmdbTrending();
+  const trending = await getTmdbTrending(range);
   let top10: any[] = [];
 
   if (trending.length > 0) {
-    // Match library items against Parallax API trending list
+    // Match library items against Parallax API trending list, preserving
+    // the trending order returned by the API (rank order).
     const tmdbMatched: any[] = [];
     const tmdbMatchedIds = new Set<string>();
 
     trending.forEach(t => {
       const match = library.find((item: any) => {
         const norm = normTitle(item.Name ?? "");
-        if (norm !== t.title) return false;
+        if (norm !== normTitle(t.title ?? "")) return false;
         const year = item.ProductionYear ?? null;
         if (t.year && year) return Math.abs(t.year - year) <= 1;
         return true;
@@ -80,29 +83,9 @@ export async function getTop10TrendingInLibrary(authData: AuthData) {
       }
     });
 
-    if (tmdbMatched.length >= 5) {
-      top10 = tmdbMatched.slice(0, 10);
-    } else {
-      const recentPool = library.filter((item: any) => {
-        const added = item.DateCreated ? new Date(item.DateCreated).getTime() : 0;
-        const year  = item.ProductionYear ?? 0;
-        const currentYear = new Date().getFullYear();
-        return (now - added < threeYearsMs) || (currentYear - year <= 3);
-      });
-
-      const pool = recentPool.length >= 10 ? recentPool : library;
-      const scored = pool.map((item: any) => {
-        const isMatched = tmdbMatchedIds.has(item.Id);
-        const added = item.DateCreated ? new Date(item.DateCreated).getTime() : 0;
-        const recencyBoost = now - added < oneYearMs ? 50 : 0;
-        return {
-          item,
-          score: (isMatched ? 500 : 0) + recencyBoost + (item.CommunityRating ?? 0) * 10,
-        };
-      });
-      scored.sort((a, b) => b.score - a.score);
-      top10 = scored.slice(0, 10).map(s => s.item);
-    }
+    // Always trust real matches — even just 1 — instead of discarding them
+    // below an arbitrary threshold. Filler (below) tops up to 10 if needed.
+    top10 = tmdbMatched.slice(0, 10);
   } else {
     // No API Response fallback
     const currentYear = new Date().getFullYear();

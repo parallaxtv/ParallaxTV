@@ -39,27 +39,19 @@ export function ScrollRow({ children, className = "" }: { children: React.ReactN
     setScrollLeft(rowRef.current.scrollLeft);
   };
 
-  const handleMouseLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
+  const handleMouseLeave = () => setIsDragging(false);
+  const handleMouseUp = () => setIsDragging(false);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !rowRef.current) return;
     e.preventDefault();
     const x = e.pageX - rowRef.current.offsetLeft;
-    const walk = (x - startX) * 1.5; // Multiply for faster scrolling
+    const walk = (x - startX) * 1.5; 
     
-    // If we move the mouse more than 5 pixels, count it as a drag (not a click)
     if (Math.abs(walk) > 5) setHasDragged(true);
-    
     rowRef.current.scrollLeft = scrollLeft - walk;
   };
 
-  // Prevent click events on children if the user was just dragging the row
   const handleClickCapture = (e: React.MouseEvent) => {
     if (hasDragged) {
       e.stopPropagation();
@@ -71,18 +63,24 @@ export function ScrollRow({ children, className = "" }: { children: React.ReactN
   return (
     <div className={`relative group/row ${className}`}>
       {canLeft && (
-        <button onClick={() => scroll("left")} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-full bg-gradient-to-r from-[#141414] to-transparent flex items-center justify-start pl-1 opacity-0 group-hover/row:opacity-100 transition-opacity">
-          <span className="bg-black/70 hover:bg-white hover:text-black text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors">‹</span>
+        <button onClick={() => scroll("left")} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-12 h-[80%] bg-gradient-to-r from-[#0B0B0F] via-[#0B0B0F]/80 to-transparent flex items-center justify-start pl-2 opacity-0 group-hover/row:opacity-100 transition-opacity pointer-events-none">
+          <span className="bg-[#1A1A24]/90 border border-white/10 hover:border-white/30 hover:scale-110 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-2xl backdrop-blur-md transition-all pointer-events-auto">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+          </span>
         </button>
       )}
+      
       {canRight && (
-        <button onClick={() => scroll("right")} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-full bg-gradient-to-l from-[#141414] to-transparent flex items-center justify-end pr-1 opacity-0 group-hover/row:opacity-100 transition-opacity">
-          <span className="bg-black/70 hover:bg-white hover:text-black text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors">›</span>
+        <button onClick={() => scroll("right")} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-12 h-[80%] bg-gradient-to-l from-[#0B0B0F] via-[#0B0B0F]/80 to-transparent flex items-center justify-end pr-2 opacity-0 group-hover/row:opacity-100 transition-opacity pointer-events-none">
+          <span className="bg-[#1A1A24]/90 border border-white/10 hover:border-white/30 hover:scale-110 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-2xl backdrop-blur-md transition-all pointer-events-auto">
+             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+          </span>
         </button>
       )}
+
       <div 
         ref={rowRef} 
-        className={`flex overflow-x-auto gap-4 pb-3 select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`} 
+        className={`flex overflow-x-auto gap-4 pb-3 select-none scroll-smooth ${isDragging ? "cursor-grabbing" : "cursor-grab"}`} 
         style={{ scrollbarWidth: "none" }}
         onMouseDown={handleMouseDown}
         onMouseLeave={handleMouseLeave}

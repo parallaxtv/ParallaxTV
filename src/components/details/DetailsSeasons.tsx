@@ -39,7 +39,7 @@ export default function DetailsSeasons({
               <div
                 className={`rounded-xl overflow-hidden transition-all duration-300
                   ${isSelected
-                    ? "scale-[1.06] shadow-[0_8px_32px_rgba(0,0,0,0.7)] ring-2 ring-red-600"
+                    ? "scale-[1.06] shadow-[0_8px_32px_rgba(0,0,0,0.7)] ring-2 ring-[var(--color-accent)]"
                     : "scale-100 hover:scale-[1.03] opacity-50 hover:opacity-80 ring-1 ring-white/5"
                   }`}
               >
@@ -83,7 +83,7 @@ export default function DetailsSeasons({
               </div>
 
               {/* Active indicator */}
-              <div className={`mt-2.5 mx-auto transition-all duration-300 ${isSelected ? "w-8 h-0.5 bg-red-600 rounded-full" : "w-0 h-0.5"}`} />
+              <div className={`mt-2.5 mx-auto transition-all duration-300 ${isSelected ? "w-8 h-0.5 bg-[var(--color-accent)] shadow-[0_0_8px_var(--color-accent-glow)] rounded-full" : "w-0 h-0.5"}`} />
 
               <p className={`mt-1.5 text-center text-xs font-semibold truncate px-1 transition-colors duration-300 ${isSelected ? "text-white" : "text-gray-600 group-hover/season:text-gray-400"}`}>
                 {season.Name}

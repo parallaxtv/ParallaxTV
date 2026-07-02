@@ -43,15 +43,17 @@ export default function DetailsCast({
 
   if (anilistCast === null && peopleToDisplay.length === 0) return null;
 
+  const sectionTitle = anilistCast !== null ? "Characters & Voices" : "Cast & Crew";
+
   return (
     <div className="mb-10" style={{ animation: "fadeSlideUp 0.5s 0.25s ease-out both" }}>
       <SectionHeader
-        title="Cast & Crew"
+        title={sectionTitle}
         subtitle={
           anilistCast !== null ? (
             <span className="flex items-center gap-2">
-              <span className="text-[9px] font-bold uppercase tracking-widest text-red-500 bg-red-600/10 border border-red-600/30 px-1.5 py-0.5 rounded">
-                MAL
+              <span className="text-[9px] font-bold uppercase tracking-widest text-[var(--color-accent)] bg-[var(--color-accent-soft)] border border-[var(--color-accent)]/30 px-1.5 py-0.5 rounded">
+                AniList
               </span>
             </span>
           ) as any : undefined
@@ -74,25 +76,25 @@ export default function DetailsCast({
             {anilistCast.map((c: any, idx: number) => (
               <div
                 key={idx}
-                className="flex flex-col items-center w-[110px] flex-shrink-0 group/person"
+                className="flex flex-col items-center w-[140px] flex-shrink-0 group/person"
                 style={{ scrollSnapAlign: "start" }}
               >
                 {/* VA behind, character in front */}
-                <div className="relative w-20 h-20 mb-2.5">
+                <div className="relative w-24 h-24 mb-2.5">
                   <img
                     src={c.actorImage || SAFE_PLACEHOLDER}
-                    className="absolute inset-0 w-full h-full rounded-full object-cover brightness-50 ring-2 ring-transparent group-hover/person:ring-white/20 transition-all duration-300"
+                    className="absolute inset-0 w-full h-full rounded-full object-cover brightness-50 ring-2 ring-transparent group-hover/person:ring-[var(--color-accent)]/50 transition-all duration-300"
                     title={`VA: ${c.actorName}`}
                     onError={(e) => { e.currentTarget.src = SAFE_PLACEHOLDER; }}
                   />
                   <img
                     src={c.charImage || SAFE_PLACEHOLDER}
-                    className="absolute bottom-0 right-0 w-[46px] h-[46px] rounded-full object-cover border-2 border-[#141414] shadow-xl z-10 group-hover/person:scale-110 transition-transform duration-300"
+                    className="absolute bottom-0 right-0 w-[52px] h-[52px] rounded-full object-cover border-2 border-[#141414] shadow-xl z-10 group-hover/person:scale-110 transition-transform duration-300"
                     title={c.charName}
                     onError={(e) => { e.currentTarget.src = SAFE_PLACEHOLDER; }}
                   />
                 </div>
-                <span className="text-xs font-semibold text-white text-center w-full truncate leading-snug group-hover/person:text-red-400 transition-colors">
+                <span className="text-xs font-semibold text-white text-center w-full truncate leading-snug group-hover/person:text-[var(--color-accent)] transition-colors">
                   {c.charName}
                 </span>
                 <span className="text-[10px] text-gray-500 text-center w-full truncate mt-0.5">
@@ -133,11 +135,11 @@ export default function DetailsCast({
             return (
               <div
                 key={`${person.Id}-${idx}`}
-                className="flex flex-col items-center w-[110px] flex-shrink-0 group/person cursor-pointer"
+                className="flex flex-col items-center w-[140px] flex-shrink-0 group/person cursor-pointer"
                 style={{ scrollSnapAlign: "start" }}
                 onClick={() => navigate(`/person/${person.Id}`, { state: { person } })}
               >
-                <div className="relative w-20 h-20 rounded-full overflow-hidden mb-2.5 ring-2 ring-transparent group-hover/person:ring-white/40 transition-all duration-300 shadow-lg">
+                <div className="relative w-24 h-24 rounded-full overflow-hidden mb-2.5 ring-2 ring-transparent group-hover/person:ring-[var(--color-accent)]/50 transition-all duration-300 shadow-lg group-hover/person:shadow-[0_0_20px_var(--color-accent-glow)]">
                   <img
                     src={
                       person.PrimaryImageTag || person.ImageTags?.Primary
@@ -151,21 +153,22 @@ export default function DetailsCast({
                       e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(person.Name)}&background=2a2a2a&color=666&size=200`;
                     }}
                   />
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover/person:opacity-100 transition-opacity duration-200 rounded-full">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover/person:opacity-100 transition-opacity duration-200 rounded-full gap-0.5">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
+                    <span className="text-[9px] font-semibold text-white/80 uppercase tracking-wider">Profile</span>
                   </div>
                 </div>
 
-                <span className="text-xs font-semibold text-white text-center w-full truncate leading-snug group-hover/person:text-red-400 transition-colors">
+                <span className="text-xs font-semibold text-white text-center w-full truncate leading-snug group-hover/person:text-[var(--color-accent)] transition-colors">
                   {person.Name}
                 </span>
                 <span className="text-[11px] text-gray-400 font-medium text-center w-full truncate mt-0.5">
                   {typesStr}
                 </span>
                 {rolesStr && (
-                  <span className="text-[10px] text-gray-600 text-center w-full truncate mt-0.5">
+                  <span className="text-[10px] text-gray-500 italic text-center w-full truncate mt-0.5">
                     {isActorOrGuest ? `as ${rolesStr}` : rolesStr}
                   </span>
                 )}

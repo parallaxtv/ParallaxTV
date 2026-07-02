@@ -47,7 +47,7 @@ export function NextEpisodeOverlay({
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
           
           <div className="absolute top-3 left-4">
-            <span className="text-[10px] font-black tracking-[0.2em] text-red-500 uppercase">Up Next</span>
+            <span className="text-[10px] font-black tracking-[0.2em] text-[var(--color-accent)] uppercase">Up Next</span>
           </div>
           
           <div className="absolute bottom-3 left-4 right-16">
@@ -63,7 +63,7 @@ export function NextEpisodeOverlay({
             <svg width="44" height="44" viewBox="0 0 44 44" className="-rotate-90">
               <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="3"/>
               <circle 
-                cx="22" cy="22" r="18" fill="none" stroke="#ef4444" strokeWidth="3" strokeLinecap="round"
+                cx="22" cy="22" r="18" fill="none" stroke="var(--color-accent)" strokeWidth="3" strokeLinecap="round"
                 strokeDasharray={`${2 * Math.PI * 18}`}
                 strokeDashoffset={`${2 * Math.PI * 18 * (nextCountdown / maxCountdown)}`}
                 style={{ transition: "stroke-dashoffset 0.9s linear" }}
@@ -78,9 +78,9 @@ export function NextEpisodeOverlay({
         <div className="px-4 py-3 flex items-center gap-3">
           <button 
             onClick={onPlayNext} 
-            className="flex items-center gap-2 bg-white text-black font-bold text-sm px-5 py-2 rounded-full hover:bg-gray-200 active:scale-95 transition-all"
+            className="flex items-center gap-2 bg-[var(--color-accent)] text-white font-bold text-sm px-5 py-2 rounded-full hover:brightness-110 active:scale-95 transition-all"
           >
-            <svg className="w-4 h-4 fill-black" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Play Now
+            <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Play Now
           </button>
           <button 
             onClick={onCancel} 

@@ -31,13 +31,20 @@ export function TitleBar({ className = "", isTransparent = false }: TitleBarProp
 
   return (
     <div
-      data-tauri-drag-region
       className={`fixed top-0 left-0 w-full h-8 z-[200] flex items-center justify-end select-none transition-opacity duration-500
         ${isTransparent ? "bg-transparent" : "bg-[#0a0a0a]/80 backdrop-blur-sm border-b border-white/5"}
         ${className}
       `}
     >
-      <div className="flex items-center h-full pointer-events-auto">
+      {/* Drag region fills the whole bar EXCEPT the buttons on the right */}
+      <div
+        data-tauri-drag-region
+        className="absolute inset-0 right-[132px]"
+        onDoubleClick={handleToggleMaximize}
+      />
+
+      {/* Window control buttons — not part of drag region */}
+      <div className="relative flex items-center h-full z-10">
         <button
           onClick={() => appWindow.minimize()}
           className="h-full w-11 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-colors"

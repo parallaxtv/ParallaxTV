@@ -69,8 +69,8 @@ function LibraryCard({ lib, authData }: { lib: any; authData: AuthData }) {
 
         </div>
 
-        {/* Subtle red accent line at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-red-600/60 to-transparent
+        {/* Subtle accent line at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[var(--color-accent)]/60 to-transparent
           opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
       </div>
@@ -148,7 +148,7 @@ export function LibraryRow({ authData }: { authData: AuthData }) {
       {/* Header */}
       <div className="flex items-baseline gap-3 mb-4">
         <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white flex items-center gap-2.5">
-          <span className="w-3 h-px bg-red-600 inline-block" />
+          <span className="w-3 h-px bg-[var(--color-accent)] inline-block" />
           My Libraries
         </h2>
         {!loading && (

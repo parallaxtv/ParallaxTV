@@ -10,8 +10,12 @@ import { destroy, init, type MpvObservableProperty } from "tauri-plugin-libmpv-a
 import { Login } from "./pages/Login";
 import { Dashboard } from "./pages/Dashboard";
 import { Details } from "./pages/Details";
+import { EpisodeDetails } from "./pages/EpisodeDetails"; // <-- Added Import
 import { VideoPlayer } from "./pages/VideoPlayer";
 import { Library } from "./pages/Library";
+import { Discover } from "./pages/Discover";
+import { RecentlyAdded } from "./pages/RecentlyAdded";
+import { Favorites } from "./pages/Favorites";
 import { PersonPage } from "./pages/PersonPage";
 import { Settings } from "./pages/Settings";
 import { useAuthStore } from "./store/auth";
@@ -145,20 +149,49 @@ function Protected({ children }: { children: React.ReactNode }) {
 }
 
 // ── THEME ROOT ────────────────────────────────────────────────────────────────
-// Applies theme background to <html> so there's no flash of wrong color
-// on page transitions between routes.
+// Applies theme background and accent colors to <html> root variables.
+// This allows Tailwind to dynamically use var(--color-accent) globally.
 
 function ThemeRoot() {
-  const { theme } = useSettings();
+  // Grab both theme and accentTheme from our Zustand store
+  const { theme, accentTheme } = useSettings();
 
   useEffect(() => {
-    const colors: Record<string, string> = {
+    const root = document.documentElement;
+
+    // 1. Background Theme Injection
+    const bgColors: Record<string, string> = {
       dark:     "#141414",
       amoled:   "#000000",
-      midnight: "#0d1117",
+      midnight: "#0a0a0f", // Deep blue-tinted black
     };
-    document.documentElement.style.backgroundColor = colors[theme] ?? colors.dark;
-  }, [theme]);
+    
+    const bgPrimary = bgColors[theme] ?? bgColors.dark;
+    root.style.backgroundColor = bgPrimary; // Fallback for standard CSS
+    root.style.setProperty('--color-bg-primary', bgPrimary);
+
+    // 2. Accent Theme Injection
+    const accentColors: Record<string, string> = {
+      aurora:  "#8b5cf6", // Purple
+      ocean:   "#38bdf8", // Blue
+      emerald: "#10b981", // Green
+      sunset:  "#f59e0b", // Amber
+      crimson: "#ef4444", // Red
+    };
+
+    // Check if the user selected a custom hex color, otherwise use the preset dictionary
+    const accent = accentTheme.startsWith("#") ? accentTheme : (accentColors[accentTheme] ?? accentColors.aurora);
+
+    // Inject the raw hex for solid colors
+    root.style.setProperty('--color-accent', accent);
+    
+    // Inject a 25% opacity version (hex + '40') for glowing box-shadows
+    root.style.setProperty('--color-accent-glow', `${accent}40`);
+    
+    // Inject a 10% opacity version (hex + '1a') for subtle active backgrounds
+    root.style.setProperty('--color-accent-soft', `${accent}1a`);
+
+  }, [theme, accentTheme]);
 
   return null;
 }
@@ -203,7 +236,17 @@ export default function App() {
             path="/title/:id"
             element={
               <Protected>
-                <Details authData={authData!} />
+                <Details authData={authData!} onLogout={logout} />
+              </Protected>
+            }
+          />
+
+          {/* ── Added Episode Details Route ── */}
+          <Route
+            path="/episode/:id"
+            element={
+              <Protected>
+                <EpisodeDetails authData={authData!} />
               </Protected>
             }
           />
@@ -230,7 +273,34 @@ export default function App() {
             path="/library/:id"
             element={
               <Protected>
-                <Library authData={authData!} />
+                <Library authData={authData!} onLogout={logout} />
+              </Protected>
+            }
+          />
+
+          <Route
+            path="/discover"
+            element={
+              <Protected>
+                <Discover authData={authData!} onLogout={logout} />
+              </Protected>
+            }
+          />
+
+          <Route
+            path="/recently-added"
+            element={
+              <Protected>
+                <RecentlyAdded authData={authData!} onLogout={logout} />
+              </Protected>
+            }
+          />
+
+          <Route
+            path="/favorites"
+            element={
+              <Protected>
+                <Favorites authData={authData!} onLogout={logout} />
               </Protected>
             }
           />

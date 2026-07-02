@@ -7,7 +7,7 @@ export function DiscoveryCast({ cast }: { cast: any[] }) {
   return (
     <div>
       <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
-        <span className="w-3 h-px bg-red-600 inline-block" />
+        <span className="w-3 h-px bg-[var(--color-accent)] inline-block shadow-[0_0_8px_var(--color-accent-glow)]" />
         Cast
       </p>
       <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">

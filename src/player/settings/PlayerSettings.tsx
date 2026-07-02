@@ -93,7 +93,7 @@ export function PlayerSettings(props: PlayerSettingsProps) {
                 </svg>
                 <span className="text-[13px] font-medium text-gray-200">Auto-Skip</span>
               </div>
-              <button className={`w-9 h-5 rounded-full transition-colors relative ${props.autoSkipEnabled ? "bg-red-600" : "bg-white/20"}`}>
+              <button className={`w-9 h-5 rounded-full transition-colors relative ${props.autoSkipEnabled ? "bg-[#38bdf8]" : "bg-white/20"}`}>
                 <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-[3px] transition-transform shadow-md ${props.autoSkipEnabled ? "translate-x-[18px]" : "translate-x-[3px]"}`} />
               </button>
             </div>

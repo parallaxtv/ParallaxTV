@@ -72,7 +72,7 @@ export function useDetails(routeItemId: string | undefined, authData: any, initi
     setNextUpLoaded(false);
     setMoreLikeThis([]);
     setAnilistCast(null);
-  }, [routeItemId]);
+  }, [routeItemId, initialItem]);
 
   // 1. Fresh item data
   useEffect(() => {
@@ -133,7 +133,12 @@ export function useDetails(routeItemId: string | undefined, authData: any, initi
           fields: ["UserData"] as any,
         });
         const seasonItems = res.data.Items ?? [];
-        if (seasonItems.length > 0) setSeasons(seasonItems);
+        if (seasonItems.length > 0) {
+          setSeasons(seasonItems);
+          if (!selectedSeasonId && nextUpLoaded) {
+            setSelectedSeasonId(nextUp?.SeasonId ?? seasonItems[0].Id);
+          }
+        }
       } catch (err) {
         console.error("Failed to fetch seasons", err);
       }

@@ -6,26 +6,18 @@ import { getPrimaryImage, getBackdropImage } from "../../utils/images";
 import { isEpisode, isMovie } from "../../utils/media";
 import { FavoriteButton } from "../ui/FavoriteButton";
 
-// ─── Landscape card — Continue Watching ──────────────────────────────────────
+// ─── Landscape card — Standard ───────────────────────────────────────────────
 
 export function LandscapeCard({ item, authData }: { item: MediaItem; authData: AuthData }) {
   const navigate = useNavigate();
-
   const episode = isEpisode(item);
   const movie   = isMovie(item);
-  const isResuming = (item.UserData?.PlaybackPositionTicks ?? 0) > 0;
 
-  const progressPct = item.UserData?.PlaybackPositionTicks && item.RunTimeTicks
-    ? Math.min((item.UserData.PlaybackPositionTicks / item.RunTimeTicks) * 100, 100)
-    : 0;
-
-  // ── Labels ────────────────────────────────────────────────────────────────
   const topLabel = episode ? (item.SeriesName ?? item.Name) : item.Name;
   const subLabel = episode
     ? `S${item.ParentIndexNumber ?? "?"} E${item.IndexNumber ?? "?"} · ${item.Name ?? ""}`
     : (item.ProductionYear ? String(item.ProductionYear) : "");
 
-  // ── Thumbnail ─────────────────────────────────────────────────────────────
   const primarySrc = episode && item.Id
     ? getPrimaryImage(authData, item.Id, 560)
     : getBackdropImage(authData, item.Id, 560);
@@ -55,44 +47,32 @@ export function LandscapeCard({ item, authData }: { item: MediaItem; authData: A
       style={{ scrollSnapAlign: "start" }}
       onClick={handleClick}
     >
-      <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-[#1c1c1c] mb-2.5 shadow-lg">
+      <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-[#1A1A24] mb-3 shadow-lg border border-white/5 group-hover:border-white/10 transition-colors">
         <img
           src={primarySrc}
           alt={topLabel}
-          className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-70"
+          className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:brightness-50"
           onError={(e) => {
             if (fallbackSrc && e.currentTarget.src !== fallbackSrc)
               e.currentTarget.src = fallbackSrc;
           }}
         />
 
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-          <button onClick={handlePlay} className="w-12 h-12 bg-white hover:bg-white/90 rounded-full flex items-center justify-center shadow-2xl transition-transform hover:scale-110" title="Play">
-            <svg className="w-5 h-5 fill-black ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+          <button onClick={handlePlay} className="w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white hover:text-black hover:scale-110 rounded-full flex items-center justify-center shadow-2xl transition-all" title="Play">
+            <svg className="w-5 h-5 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           </button>
         </div>
 
-        {isResuming && (
-          <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10">
-            Resume
-          </div>
-        )}
-
         {item.RunTimeTicks && (
-          <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-gray-300 text-[10px] font-semibold px-2 py-0.5 rounded z-10">
+          <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-md text-white text-[10px] font-medium px-2 py-1 rounded z-10">
             {formatRuntime(item.RunTimeTicks)}
-          </div>
-        )}
-
-        {progressPct > 0 && (
-          <div className="absolute bottom-0 left-0 w-full h-[3px] bg-gray-700/80 z-10">
-            <div className="h-full bg-red-600" style={{ width: `${progressPct}%` }} />
           </div>
         )}
       </div>
 
-      <div className="px-0.5">
-        <p className="text-white text-xs font-semibold truncate leading-snug">{topLabel}</p>
+      <div className="px-1">
+        <p className="text-gray-200 text-sm font-semibold truncate group-hover:text-white transition-colors">{topLabel}</p>
         <p className="text-gray-500 text-[11px] truncate mt-0.5">{subLabel}</p>
       </div>
     </div>
@@ -106,117 +86,89 @@ export function PosterCard({ item, authData }: { item: MediaItem; authData: Auth
 
   return (
     <div
-      className="flex-shrink-0 w-[150px] cursor-pointer group"
+      className="flex-shrink-0 w-[150px] md:w-[170px] cursor-pointer group"
       style={{ scrollSnapAlign: "start" }}
       onClick={() => navigate(`/title/${item.Id}`, { state: { item } })}
     >
-      <div className="relative w-full h-[225px] rounded-xl overflow-hidden bg-[#1c1c1c] mb-2.5 shadow-lg">
+      <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden bg-[#1A1A24] mb-3 shadow-lg border border-white/5 group-hover:border-white/20 transition-all duration-300 group-hover:-translate-y-1">
         <img
-          src={getPrimaryImage(authData, item.Id, 300)}
+          src={getPrimaryImage(authData, item.Id, 340)}
           alt={item.Name}
-          className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-75"
+          className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:brightness-50"
           onError={(e) => {
-            e.currentTarget.src = getBackdropImage(authData, item.Id, 300);
+            e.currentTarget.src = getBackdropImage(authData, item.Id, 340);
           }}
         />
 
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-          <div className="w-11 h-11 bg-white/90 rounded-full flex items-center justify-center shadow-xl">
-            <svg className="w-5 h-5 fill-black ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+          <div className="w-12 h-12 bg-white/20 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center shadow-2xl">
+            <svg className="w-5 h-5 fill-white ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           </div>
         </div>
 
-        {/* Favorite toggle — top-right, visible on hover */}
+        {/* Favorite toggle — top-right */}
         <FavoriteButton
           itemId={item.Id}
           isFavorite={item.UserData?.IsFavorite ?? false}
           authData={authData}
           variant="card"
-          className="opacity-0 group-hover:opacity-100"
+          className="opacity-0 group-hover:opacity-100 absolute top-2 right-2"
         />
 
         {item.CommunityRating && (
-          <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded-full z-10">
-            <svg className="w-3 h-3 fill-yellow-400 flex-shrink-0" viewBox="0 0 24 24">
+          <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-1 rounded z-10">
+            <svg className="w-3 h-3 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
             </svg>
             <span className="text-[10px] font-bold text-white">{item.CommunityRating.toFixed(1)}</span>
           </div>
         )}
-
-        <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-gray-300 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider z-10">
-          {item.Type === "Series" ? "Show" : "Film"}
-        </div>
       </div>
 
-      <p className="text-gray-300 text-[11px] font-semibold truncate px-0.5 group-hover:text-white transition-colors">
+      <p className="text-gray-300 text-[13px] font-bold truncate px-1 group-hover:text-white transition-colors">
         {item.Name}
       </p>
       {item.ProductionYear && (
-        <p className="text-gray-600 text-[10px] px-0.5 mt-0.5">{item.ProductionYear}</p>
+        <p className="text-gray-500 text-[11px] px-1 mt-0.5">{item.ProductionYear} • {item.Type === "Series" ? "TV Show" : "Movie"}</p>
       )}
     </div>
   );
 }
 
-// ─── Top 10 card — big rank number + poster ───────────────────────────────────
+// ─── Horizontal Trending Card — Top 10 ────────────────────────────────────────
 
 export function Top10Card({ item, rank, authData }: { item: MediaItem; rank: number; authData: AuthData }) {
   const navigate = useNavigate();
-  const rankStr = String(rank);
-  const isDoubleDigit = rank >= 10;
 
   return (
     <div
-      className="flex-shrink-0 cursor-pointer group"
-      style={{ scrollSnapAlign: "start", width: isDoubleDigit ? "200px" : "185px" }}
+      className="flex-shrink-0 w-[190px] md:w-[220px] cursor-pointer group overflow-hidden rounded-lg border border-white/8 bg-[#0b0f14] shadow-[0_12px_32px_rgba(0,0,0,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/15 relative"
+      style={{ scrollSnapAlign: "start" }}
       onClick={() => navigate(`/title/${item.Id}`, { state: { item } })}
     >
-      <div className="relative flex items-end">
-        <div
-          className="flex-shrink-0 font-black text-transparent select-none leading-none z-10"
-          style={{
-            fontSize: "clamp(80px, 10vw, 110px)",
-            WebkitTextStroke: "2px rgba(255,255,255,0.25)",
-            marginRight: isDoubleDigit ? "-18px" : "-14px",
-            marginBottom: "-4px",
-            letterSpacing: "-4px",
+      <div className="relative w-full aspect-[2/3] overflow-hidden rounded-lg">
+        <img
+          src={getPrimaryImage(authData, item.Id, 640)}
+          alt={item.Name}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 rounded-lg"
+          onError={(e) => {
+            e.currentTarget.src = getBackdropImage(authData, item.Id, 640);
           }}
-        >
-          {rankStr}
+        />
+
+        <div className="absolute left-3 top-3 z-20 flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-black/60 text-sm font-bold text-white shadow-sm">
+          {rank}
         </div>
 
-        <div className="relative flex-shrink-0 w-[130px] h-[195px] rounded-xl overflow-hidden bg-[#1c1c1c] shadow-xl z-20 transition-all duration-300 group-hover:scale-[1.04] group-hover:shadow-2xl">
-          <img
-            src={getPrimaryImage(authData, item.Id, 260)}
-            alt={item.Name}
-            className="w-full h-full object-cover transition-all duration-300 group-hover:brightness-75"
-            onError={(e) => {
-              e.currentTarget.src = getBackdropImage(authData, item.Id, 260);
-            }}
-          />
-
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-            <div className="w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-xl">
-              <svg className="w-4 h-4 fill-black ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            </div>
+        <div className="absolute bottom-3 left-3 right-3 z-20">
+          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/8 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-200">
+            Top 10
           </div>
-
-          {/* Favorite toggle — top-right, visible on hover */}
-          <FavoriteButton
-            itemId={item.Id}
-            isFavorite={item.UserData?.IsFavorite ?? false}
-            authData={authData}
-            variant="card"
-            className="opacity-0 group-hover:opacity-100"
-          />
+          <p className="mt-2 text-[14px] font-semibold leading-tight text-white line-clamp-2">
+            {item.Name}
+          </p>
         </div>
       </div>
-
-      <p className="text-gray-400 text-[11px] font-semibold truncate mt-2 group-hover:text-white transition-colors"
-        style={{ paddingLeft: isDoubleDigit ? "4px" : "0" }}>
-        {item.Name}
-      </p>
     </div>
   );
 }

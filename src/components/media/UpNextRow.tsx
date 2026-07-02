@@ -128,7 +128,14 @@ export function UpNextRow({
 
   return (
     <div className="mb-10 relative group/row">
-      <h3 className="text-xl font-bold text-white mb-4">Up Next</h3>
+      
+      {/* ── Sub-section Header (Discovery Style) ── */}
+      <div className="flex items-baseline gap-3 mb-4">
+        <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white flex items-center gap-2.5">
+          <span className="w-3 h-px bg-[var(--color-accent)] inline-block shadow-[0_0_8px_var(--color-accent-glow)]" />
+          Up Next
+        </h2>
+      </div>
 
       {canScrollLeft && (
         <button onClick={() => scroll("left")} className="absolute left-0 top-[55%] -translate-y-1/2 -translate-x-5 z-30 w-12 h-12 flex items-center justify-center bg-black/80 hover:bg-black border border-white/10 hover:border-white/30 rounded-full text-white shadow-2xl backdrop-blur-md transition-all duration-200 hover:scale-110 opacity-0 group-hover/row:opacity-100">
@@ -157,13 +164,21 @@ export function UpNextRow({
                 <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-[#1e1e1e] mb-3 shadow-lg">
                   <img src={epImgSrc} alt={ep.Name} className="w-full h-full object-cover transition duration-300 group-hover:scale-105 group-hover:brightness-50" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = SAFE_PLACEHOLDER; }} />
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20 flex flex-col justify-between p-2.5">
+                    
+                    {/* ── Matched Small Hover Actions ── */}
                     <div className="flex justify-end gap-2">
-                      <button onClick={(e) => handleToggleWatched(e, ep)} className="w-8 h-8 bg-black/50 hover:bg-black/90 border border-white/20 hover:border-white/50 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-all shadow-lg hover:scale-110" title="Mark as Watched"><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg></button>
-                      <button onClick={(e) => handleRemoveProgress(e, ep)} className="w-8 h-8 bg-black/50 hover:bg-black/90 border border-white/20 hover:border-white/50 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-all shadow-lg hover:scale-110" title="Hide from Up Next"><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                      <button onClick={(e) => handleToggleWatched(e, ep)} className="w-8 h-8 bg-black/60 hover:bg-white hover:text-black text-white rounded-full flex items-center justify-center backdrop-blur-md transition-all shadow-lg hover:scale-110" title="Mark as Watched"><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg></button>
+                      <button onClick={(e) => handleRemoveProgress(e, ep)} className="w-8 h-8 bg-black/60 hover:bg-white hover:text-black text-white rounded-full flex items-center justify-center backdrop-blur-md transition-all shadow-lg hover:scale-110" title="Hide from Up Next"><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
                     </div>
+                    
+                    {/* ── Matched Play Button ── */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <button onClick={(e) => playEpisode(e, ep)} className="w-12 h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-2xl drop-shadow-2xl pointer-events-auto transition-transform hover:scale-110" title="Play"><svg className="w-5 h-5 fill-black ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg></button>
+                      <button onClick={(e) => playEpisode(e, ep)} className="w-12 h-12 bg-white/10 border border-white/20 hover:bg-white hover:text-black rounded-full flex items-center justify-center shadow-2xl pointer-events-auto transition-transform hover:scale-110" title="Play">
+                        {/* Note: fill-current allows the text-black hover to change the icon color */}
+                        <svg className="w-5 h-5 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                      </button>
                     </div>
+
                   </div>
                 </div>
                 <div className="px-0.5">

@@ -12,8 +12,6 @@ interface DiscoveryCardProps {
 }
 
 export function DiscoveryCard({ item, match, onClick }: DiscoveryCardProps) {
-  const accent = item.accentColor || "#e50914";
-
   return (
     <div
       className="discovery-card flex-shrink-0 w-[175px] cursor-pointer group/card relative"
@@ -57,29 +55,31 @@ export function DiscoveryCard({ item, match, onClick }: DiscoveryCardProps) {
           </div>
         )}
 
-        {/* Library dot top-right */}
+        {/* ── Updated: Library Badge top-right ── */}
         {match && (
           <div
-            className="absolute top-2 right-2 z-10 w-5 h-5 rounded-full flex items-center justify-center shadow-lg"
-            style={{ background: accent }}
+            className="absolute top-2 right-2 z-10 flex items-center gap-1 px-2 py-0.5 rounded bg-black/75 backdrop-blur-sm shadow-lg border border-white/10"
             title="In your library"
           >
-            <svg className="w-3 h-3 fill-white" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
+            <svg className="w-2.5 h-2.5 text-[var(--color-accent)]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
+            <span className="text-[9px] font-bold text-white uppercase tracking-wider mt-0.5">Library</span>
           </div>
         )}
 
         {/* Centre hover: play or More Info */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-200 z-20 pointer-events-none">
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-300 z-20 pointer-events-none">
           {match ? (
-            <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-2xl">
-              <svg className="w-6 h-6 fill-black translate-x-0.5" viewBox="0 0 24 24">
+            /* Frosted Glass Play Button */
+            <div className="w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center shadow-2xl transition-transform duration-300 group-hover/card:scale-110">
+              <svg className="w-5 h-5 fill-white ml-0.5" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
               </svg>
             </div>
           ) : (
-            <span className="text-[11px] font-bold text-white bg-black/60 backdrop-blur-sm border border-white/20 px-3 py-1.5 rounded-full shadow-xl">
+            /* Frosted Glass Pill */
+            <span className="text-[11px] font-bold text-white bg-black/50 backdrop-blur-md border border-white/20 px-4 py-2 rounded-full shadow-2xl transition-transform duration-300 group-hover/card:scale-110">
               More Info
             </span>
           )}

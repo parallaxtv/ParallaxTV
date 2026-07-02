@@ -6,28 +6,16 @@ import { createJellyfinApi } from "../../lib/jellyfinApi";
 import { AuthData } from "../../types/auth";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
-
-// Genres to always skip — too broad or not useful as a row
-const SKIP_GENRES = new Set([
-  "Unknown", "Foreign", "Short", "News", "Talk Show",
-  "Game Show", "Home and Garden",
-]);
-
-// Max genre chips to show so the dashboard stays scannable
+const SKIP_GENRES = new Set(["Unknown", "Foreign", "Short", "News", "Talk Show", "Game Show", "Home and Garden"]);
 const MAX_GENRES = 24;
-
-// Min items a genre needs to get its own row
 const MIN_ITEMS = 3;
 
-// ─── GenreRows ────────────────────────────────────────────────────────────────
-
-// Change authData: any to authData: AuthData
 export function GenreRows({ authData }: { authData: AuthData }) {
   const [genreRows, setGenreRows] = useState<{ genre: string; items: any[] }[]>([]);
   const [selectedGenre, setSelectedGenre] = useState("");
-  const [loading, setLoading]     = useState(true);
-  const hasFetched                = useRef(false);
-  const chipScrollRef             = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(true);
+  const hasFetched = useRef(false);
+  const chipScrollRef = useRef<HTMLDivElement>(null);
 
   const scrollChips = (dir: "left" | "right") => {
     const el = chipScrollRef.current;
@@ -41,12 +29,9 @@ export function GenreRows({ authData }: { authData: AuthData }) {
 
     async function load() {
       try {
-        // --- NEW CODE START ---
         const api = createJellyfinApi(authData.serverUrl, authData.token);
         const itemsApi = getItemsApi(api);
-        // --- NEW CODE END ---
-
-        // 1. Fetch a broad pool with genre info — no limit on genres, 300 items
+        
         const poolRes = await itemsApi.getItems({
           userId: authData.userId,
           includeItemTypes: ["Movie", "Series"],
@@ -60,7 +45,6 @@ export function GenreRows({ authData }: { authData: AuthData }) {
         const pool = poolRes.data.Items ?? [];
         if (pool.length === 0) { setLoading(false); return; }
 
-        // 2. Count items per genre
         const genreCount: Record<string, number> = {};
         pool.forEach((item: any) => {
           (item.Genres ?? []).forEach((g: string) => {
@@ -68,7 +52,6 @@ export function GenreRows({ authData }: { authData: AuthData }) {
           });
         });
 
-        // 3. Sort genres by item count, take top genres with enough items
         const topGenres = Object.entries(genreCount)
           .filter(([, count]) => count >= MIN_ITEMS)
           .sort((a, b) => b[1] - a[1])
@@ -77,7 +60,6 @@ export function GenreRows({ authData }: { authData: AuthData }) {
 
         if (topGenres.length === 0) { setLoading(false); return; }
 
-        // 4. Fetch items per genre in parallel (top rated per genre)
         const rows = await Promise.all(
           topGenres.map(async (genre) => {
             try {
@@ -107,7 +89,6 @@ export function GenreRows({ authData }: { authData: AuthData }) {
         setLoading(false);
       }
     }
-
     load();
   }, [authData]);
 
@@ -116,43 +97,40 @@ export function GenreRows({ authData }: { authData: AuthData }) {
   const selectedRow = genreRows.find((row) => row.genre === selectedGenre) ?? genreRows[0];
 
   return (
-    <div className="mb-10" style={{ animation: "rowFadeIn 0.4s ease-out both" }}>
+    <div className="mb-10 relative group/row" style={{ animation: "rowFadeIn 0.4s ease-out both" }}>
+      
+      {/* ── Header ── */}
       <div className="flex items-baseline gap-3 mb-4">
         <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white flex items-center gap-2.5">
-          <span className="w-3 h-px bg-red-600 inline-block" />
+          <span className="w-3 h-px bg-[var(--color-accent)] inline-block shadow-[0_0_8px_var(--color-accent-glow)]" />
           Browse by Genre
         </h2>
-        <span className="text-[11px] text-gray-600 font-medium">
-          {selectedRow.items.length} title{selectedRow.items.length !== 1 ? "s" : ""}
-        </span>
       </div>
 
-      <div className="relative group">
+      {/* ── Chips Container ── */}
+      <div className="relative mb-6">
         <button
           onClick={() => scrollChips("left")}
-          aria-label="Scroll genres left"
-          className="absolute left-0 top-0 bottom-4 z-10 flex items-center px-1.5 bg-gradient-to-r from-black via-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center bg-[#1A1A24]/90 hover:bg-[#1A1A24] border border-white/10 hover:border-white/30 rounded-full text-white shadow-2xl backdrop-blur-md transition-all opacity-0 group-hover/row:opacity-100"
         >
-          <span className="w-7 h-7 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10">
-            ‹
-          </span>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
         </button>
 
-        <div ref={chipScrollRef} className="flex gap-2 overflow-x-auto scrollbar-hide pb-4">
+        <div ref={chipScrollRef} className="flex gap-2 overflow-x-auto scrollbar-hide px-2">
           {genreRows.map(({ genre, items }) => {
             const isSelected = genre === selectedRow.genre;
             return (
               <button
                 key={genre}
                 onClick={() => setSelectedGenre(genre)}
-                className={`flex-shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition-all ${
+                className={`flex-shrink-0 rounded-full border px-5 py-2 text-xs font-bold transition-all ${
                   isSelected
-                    ? "bg-white text-black border-white shadow-lg"
+                    ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-[#071017] shadow-[0_0_15px_var(--color-accent-glow)]"
                     : "bg-white/5 text-gray-300 border-white/10 hover:bg-white/10 hover:text-white hover:border-white/25"
                 }`}
               >
                 {genre}
-                <span className={`ml-2 font-semibold ${isSelected ? "text-black/50" : "text-gray-600"}`}>
+                <span className={`ml-2 ${isSelected ? "text-black/60" : "text-gray-600"}`}>
                   {items.length}
                 </span>
               </button>
@@ -162,18 +140,16 @@ export function GenreRows({ authData }: { authData: AuthData }) {
 
         <button
           onClick={() => scrollChips("right")}
-          aria-label="Scroll genres right"
-          className="absolute right-0 top-0 bottom-4 z-10 flex items-center px-1.5 bg-gradient-to-l from-black via-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center bg-[#1A1A24]/90 hover:bg-[#1A1A24] border border-white/10 hover:border-white/30 rounded-full text-white shadow-2xl backdrop-blur-md transition-all opacity-0 group-hover/row:opacity-100"
         >
-          <span className="w-7 h-7 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10">
-            ›
-          </span>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
         </button>
       </div>
 
       <MediaRow
         key={selectedRow.genre}
-        title={selectedRow.genre}
+        title=""
+        hideHeader
         items={selectedRow.items}
         loading={false}
         variant="poster"
