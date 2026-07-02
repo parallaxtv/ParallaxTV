@@ -58,31 +58,27 @@ It is designed for people who want Jellyfin to feel fast, immersive, and purpose
 
 ### Native MPV Playback
 
-Enjoy smooth playback with native MPV integration, hardware acceleration, direct play support, subtitle controls, playback speed, and fullscreen-first behavior.
+Enjoy smooth playback with native MPV integration, hardware acceleration, direct play support, subtitle controls, playback speed, and fullscreen-first behavior. This is the core of the experience: Jellyfin content rendered in a desktop environment that feels responsive, reliable, and built around the media itself.
 
 ### Beautiful, Focused UI
 
-ParallaxTV is built to feel calm and premium. The layout is designed to keep attention on the content rather than the chrome around it.
+ParallaxTV is built to feel calm and premium. The layout is designed to keep attention on the content rather than the chrome around it, with a polished visual language that makes browsing and playback feel intentional.
 
 ### Discovery That Feels Personal
 
-Continue watching, up next, recommendations, favorites, and discovery rows work together to make browsing feel intuitive.
+Continue watching, up next, recommendations, favorites, and discovery rows work together to make browsing feel intuitive. The app is designed to help users discover what they want to watch next without feeling buried under endless menus.
 
 ### Built for Anime and Media Fans
 
-From anime discovery to rich details pages and recommendation flows, ParallaxTV is tuned for viewers who want more than a basic library UI.
+From anime discovery to rich details pages and recommendation flows, ParallaxTV is tuned for viewers who want more than a basic library UI. The experience is especially strong for users who care about presentation, metadata quality, and a more immersive viewing flow.
 
----
+### Settings and Customization
 
-## Preview Gallery
+ParallaxTV includes a dedicated settings experience for playback, appearance, discovery, and Jellyfin connection details. The goal is to make configuration feel straightforward while still giving power users plenty of control.
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/parallaxtv/ParallaxTV/main/docs/images/hero.gif" alt="ParallaxTV interface preview" width="100%" />
-</p>
+### Smart Playback Experience
 
-<p align="center">
-  <img src="src/assets/banner.png" alt="ParallaxTV branding" width="70%" />
-</p>
+The app supports resume behavior, episode progression, playback reporting, and a smoother continuity between browsing and watching. These details help the experience feel more like a cohesive media platform and less like a generic client.
 
 ---
 
@@ -121,13 +117,17 @@ For a production build:
 npm run tauri build
 ```
 
+### Development Notes
+
+ParallaxTV is actively developed and is still evolving quickly. The current focus is on refining the overall experience, improving stability, and making the app feel more deliberate and cohesive across the full media flow.
+
 ---
 
 ## Project Philosophy
 
 ParallaxTV exists to make Jellyfin feel like a true desktop application again: fast, elegant, and intentional.
 
-It is built for users who want a more immersive experience without sacrificing the flexibility of self-hosted media.
+It is built for users who want a more immersive experience without sacrificing the flexibility of self-hosted media. The project is guided by a simple idea: media should feel beautiful, responsive, and effortless to enjoy from the first launch.
 
 ---
 
@@ -161,7 +161,15 @@ It is built for users who want a more immersive experience without sacrificing t
 
 Contributions are welcome. If you have an idea, bug report, or improvement, open an issue or start a discussion.
 
-Please include as much context as possible so the project can be improved effectively.
+Please include as much context as possible so the project can be improved effectively. Feedback from Jellyfin users, anime fans, and self-hosting enthusiasts is especially valuable as the project continues to grow.
+
+---
+
+## Community and Feedback
+
+ParallaxTV is built with the community in mind. If you are a Jellyfin user, anime fan, media server operator, or desktop app enthusiast, your feedback helps shape the direction of the project.
+
+Please use GitHub Issues and Discussions to report bugs, share ideas, and help define what the experience should become next.
 
 ---
 
@@ -170,6 +178,8 @@ Please include as much context as possible so the project can be improved effect
 If you enjoy ParallaxTV and want to support future development, consider supporting the project:
 
 https://ko-fi.com/iitzmyung
+
+Support helps fund development, testing, hardware, software licensing, hosting, and continued refinement of the experience.
 
 ---
 
@@ -184,6 +194,18 @@ See the LICENSE file for full details.
 ## Trademark Notice
 
 The ParallaxTV name, logo, branding, artwork, and related assets are the property of the ParallaxTV project. Forks and derivative works should use a different name and branding if they are distributed publicly.
+
+---
+
+## Acknowledgements
+
+Special thanks to the Jellyfin team, the MPV project, the Tauri team, the React ecosystem, and the wider open-source community for making projects like this possible.
+
+---
+
+## Disclaimer
+
+ParallaxTV is an independent community project and is not affiliated with, endorsed by, or officially connected to the Jellyfin Project. Jellyfin is a trademark of the Jellyfin Project.
 
 ---
 
