@@ -4,218 +4,106 @@
   <img src="src/assets/banner.png" alt="ParallaxTV Banner" />
 </p>
 
+<p align="center">
+  <img src="docs/images/hero.gif" alt="ParallaxTV Action Demo" />
+</p>
+
 <h3 align="center">
-A Premium Jellyfin Desktop Client
+  A Premium Jellyfin Desktop Client
 </h3>
 
 <p align="center">
-Built with Tauri, React, TypeScript and MPV
+  Built with Tauri, React, TypeScript and MPV
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/status-alpha-orange" />
-  <img src="https://img.shields.io/badge/platform-windows-blue" />
-  <img src="https://img.shields.io/badge/jellyfin-supported-00A4DC" />
-  <img src="https://img.shields.io/badge/tauri-v2-purple" />
-  <img src="https://img.shields.io/badge/react-19-61DAFB" />
-  <img src="https://img.shields.io/badge/license-AGPL--3.0-green" />
+  <img src="https://img.shields.io/badge/version-v0.1.1-blue" alt="Version" />
+  <img src="https://img.shields.io/badge/status-alpha-orange" alt="Status" />
+  <img src="https://img.shields.io/badge/platform-windows-blue" alt="Platform" />
+  <img src="https://img.shields.io/badge/jellyfin-supported-00A4DC" alt="Jellyfin" />
+  <img src="https://img.shields.io/badge/tauri-v2-purple" alt="Tauri" />
+  <img src="https://img.shields.io/badge/react-19-61DAFB" alt="React" />
+  <img src="https://img.shields.io/badge/license-AGPL--3.0-green" alt="License" />
 </p>
 
 ---
 
 > [!WARNING]
-> ParallaxTV is currently in Alpha.
->
-> Features may change, bugs may exist, and breaking changes can occur between releases.
->
-> Feedback, bug reports, and feature suggestions are highly encouraged.
+> **ParallaxTV is currently in Alpha.**
+> Features may change, bugs may exist, and breaking changes can occur between releases. Feedback, bug reports, and feature suggestions are highly encouraged!
 
----
+## 🚀 What's New in v0.1.1
 
-## Overview
+This release marks a major milestone for ParallaxTV, giving the client its own distinct visual identity and bringing massive improvements to the desktop experience.
+* **Brand New UI:** A completely overhauled, modern interface designed specifically for a premium desktop experience.
+* **Enhanced Discovery:** Smarter trending logic and refined recommendation rows to help you find what to watch faster.
+* **Performance Polish:** Smoother transitions, faster metadata loading, and various under-the-hood MPV playback optimizations.
 
-ParallaxTV is a premium open-source Jellyfin desktop client focused on performance, beautiful design, and a modern streaming experience.
+## 💡 Why ParallaxTV?
 
-Built with Tauri, React, TypeScript, and MPV, ParallaxTV combines the flexibility of Jellyfin with the responsiveness and polish expected from modern streaming applications.
+ParallaxTV bridges the gap between server flexibility and premium playback performance. While traditional browser-based clients struggle with high-bitrate media and heavy anime files, ParallaxTV utilizes native integration to deliver a flawless, stutter-free streaming experience.
 
-Unlike traditional browser-based clients, ParallaxTV uses native MPV playback to provide smooth playback of high bitrate media, anime, movies, and TV shows.
+| Feature | Standard Browser Clients | ParallaxTV |
+| :--- | :--- | :--- |
+| **Playback Engine** | Standard HTML5 | **Native MPV Player** |
+| **High Bitrate / HEVC** | Often triggers server transcoding | **Direct Play supported natively** |
+| **User Interface** | Web-based, functional | **Native desktop, highly polished** |
+| **Anime Features** | Basic metadata | **Deep AniList & Jikan integration** |
+| **Performance** | Browser-dependent limitations | **Deep hardware acceleration** |
 
----
+## 🖼️ Screenshot Gallery
 
-## Features
+<p align="center">
+  <img src="src/assets/screenshot-home.png" width="45%" alt="Home Dashboard" />
+  <img src="src/assets/screenshot-player.png" width="45%" alt="MPV Player Interface" />
+</p>
+<p align="center">
+  <img src="src/assets/screenshot-anime.png" width="45%" alt="Anime Discovery" />
+  <img src="src/assets/screenshot-settings.png" width="45%" alt="Customization Settings" />
+</p>
 
-### Native MPV Playback
+## ✨ Feature Highlights
 
-* Native MPV player integration
-* Hardware accelerated playback
-* HEVC / H.265 support
-* High bitrate support
-* Direct Play support
-* Server transcoding support
-* Audio track switching
-* Subtitle switching
-* Playback speed controls
-* Fullscreen support
+### 🎥 Native MPV Playback
+Say goodbye to unnecessary server transcoding. ParallaxTV offers hardware-accelerated playback with robust support for HEVC/H.265 and extreme bitrate files. Effortlessly switch audio tracks and subtitles, and utilize custom playback speed controls without dropping frames.
 
-### Smart TV Experience
+### 🎨 Beautiful Smart UI
+Enjoy a highly responsive, modern interface that feels at home on your desktop. Keep track of your media with *Continue Watching*, *Up Next*, and dynamic *Watch History*. Seamlessly resume playback exactly where you left off, complete with automatic progress reporting to your Jellyfin server.
 
-* Continue Watching
-* Up Next episodes
-* Watch History
-* Favorites
-* Resume playback
-* Episode progress tracking
-* Automatic playback reporting to Jellyfin
-* Smart playback resume
+### 🌸 Built for Anime Fans
+Elevate your anime library with native **AniList** and **Jikan** integration. Discover new shows, browse cast and voice actor information, watch trailers directly in the client, and get personalized recommendations based on your unique watch history.
 
-### Anime Features
+### 🔍 Advanced Discovery & Skipping
+Find exactly what you want to watch with dynamic recommendation rows, genre-based discovery, and trending content algorithms. When you're watching, take advantage of our smart detection tools:
+* **Skip Intro / Outro**
+* **Recap Detection**
+* **Next Episode Countdown & Auto-Skip**
+* **Trickplay Previews**
 
-* AniList integration
-* Anime discovery
-* Voice actor information
-* Anime recommendations
-* Trailer support
-* Anime cast pages
-* Enhanced anime metadata
+## 📦 Download & Installation
 
-### Discovery System
+Prebuilt Windows installers are available through our [GitHub Releases](https://github.com/parallaxtv/ParallaxTV/releases) page.
 
-* Trending content
-* Recommended content
-* Because You Watched
-* Genre-based discovery
-* Similar content suggestions
-* Dynamic recommendation rows
+* **Recommended:** `NSIS Installer (.exe)`
+* **Alternative:** `MSI Installer (.msi)`
 
-### Advanced Playback Features
+### 🛠️ Building from Source
 
-* Intro detection
-* Outro detection
-* Recap detection
-* Skip Intro
-* Skip Outro
-* Auto Skip
-* Next Episode countdown
-* Trickplay previews
-* Playback statistics overlay
-* Keyboard shortcuts overlay
-
-### Settings
-
-* Appearance settings
-* Playback settings
-* Discovery settings
-* Jellyfin settings
-* About page
-
----
-
-## Download
-
-Prebuilt Windows installers are available through GitHub Releases.
-
-Latest release:
-
-https://github.com/parallaxtv/ParallaxTV/releases
-
-Recommended:
-
-* NSIS Installer (.exe)
-
-Alternative:
-
-* MSI Installer (.msi)
-
----
-
-## Built With
-
-### Frontend
-
-* React
-* TypeScript
-* Vite
-* Zustand
-
-### Desktop Framework
-
-* Tauri v2
-
-### Playback Engine
-
-* MPV
-
-### Media Server
-
-* Jellyfin
-
-### Anime Metadata
-
-* AniList
-* Jikan
-
-### Backend Services
-
-* Cloudflare Workers
-* Cloudflare KV
-
----
-
-## Current Status
-
-### Version
-
-v0.1.0-alpha
-
-### Development Status
-
-ParallaxTV is actively developed and already provides a functional media experience.
-
-The project is currently Alpha software and may contain bugs or unfinished features.
-
-Expect:
-
-* Bugs
-* Missing features
-* UI refinements
-* Breaking changes between releases
-
----
-
-## Installation
-
-### Prerequisites
-
-* Jellyfin Server
-* Windows 10 or Windows 11
-* Node.js 20+
-* Rust
-* Tauri v2
-
-### Clone Repository
+If you prefer to build ParallaxTV yourself, ensure you have **Node.js 20+**, **Rust**, and **Tauri v2** installed on your Windows 10/11 machine.
 
 ```bash
-git clone https://github.com/parallaxtv/ParallaxTV.git
+# Clone the repository
+git clone [https://github.com/parallaxtv/ParallaxTV.git](https://github.com/parallaxtv/ParallaxTV.git)
 cd ParallaxTV
-```
 
-### Install Dependencies
-
-```bash
+# Install dependencies
 npm install
-```
 
-### Development
-
-```bash
+# Run in development mode
 npm run tauri dev
-```
 
-### Production Build
-
-```bash
+# Build for production
 npm run tauri build
-```
 
 ---
 
