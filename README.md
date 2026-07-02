@@ -38,6 +38,16 @@ Version 0.1.1 marks the moment ParallaxTV starts feeling like its own product ra
 
 ---
 
+## Overview
+
+ParallaxTV is a premium open-source Jellyfin desktop client focused on performance, beautiful design, and a modern streaming experience.
+
+Built with Tauri, React, TypeScript, and MPV, ParallaxTV combines the flexibility of Jellyfin with the responsiveness and polish expected from modern streaming applications.
+
+Unlike traditional browser-based clients, ParallaxTV uses native MPV playback to provide smooth playback of high bitrate media, anime, movies, and TV shows.
+
+---
+
 ## Why ParallaxTV?
 
 Most Jellyfin clients feel like browser experiences wrapped in a shell. ParallaxTV is different.
@@ -54,31 +64,125 @@ It is designed for people who want Jellyfin to feel fast, immersive, and purpose
 
 ---
 
-## Feature Highlights
+## Features
 
 ### Native MPV Playback
 
-Enjoy smooth playback with native MPV integration, hardware acceleration, direct play support, subtitle controls, playback speed, and fullscreen-first behavior. This is the core of the experience: Jellyfin content rendered in a desktop environment that feels responsive, reliable, and built around the media itself.
+- Native MPV player integration
+- Hardware accelerated playback
+- HEVC / H.265 support
+- High bitrate support
+- Direct Play support
+- Server transcoding support
+- Audio track switching
+- Subtitle switching
+- Playback speed controls
+- Fullscreen support
 
-### Beautiful, Focused UI
+### Smart TV Experience
 
-ParallaxTV is built to feel calm and premium. The layout is designed to keep attention on the content rather than the chrome around it, with a polished visual language that makes browsing and playback feel intentional.
+- Continue Watching
+- Up Next episodes
+- Watch History
+- Favorites
+- Resume playback
+- Episode progress tracking
+- Automatic playback reporting to Jellyfin
+- Smart playback resume
 
-### Discovery That Feels Personal
+### Anime Features
 
-Continue watching, up next, recommendations, favorites, and discovery rows work together to make browsing feel intuitive. The app is designed to help users discover what they want to watch next without feeling buried under endless menus.
+- AniList integration
+- Anime discovery
+- Voice actor information
+- Anime recommendations
+- Trailer support
+- Anime cast pages
+- Enhanced anime metadata
 
-### Built for Anime and Media Fans
+### Discovery System
 
-From anime discovery to rich details pages and recommendation flows, ParallaxTV is tuned for viewers who want more than a basic library UI. The experience is especially strong for users who care about presentation, metadata quality, and a more immersive viewing flow.
+- Trending content
+- Recommended content
+- Because You Watched
+- Genre-based discovery
+- Similar content suggestions
+- Dynamic recommendation rows
 
-### Settings and Customization
+### Advanced Playback Features
 
-ParallaxTV includes a dedicated settings experience for playback, appearance, discovery, and Jellyfin connection details. The goal is to make configuration feel straightforward while still giving power users plenty of control.
+- Intro detection
+- Outro detection
+- Recap detection
+- Skip Intro
+- Skip Outro
+- Auto Skip
+- Next Episode countdown
+- Trickplay previews
+- Playback statistics overlay
+- Keyboard shortcuts overlay
 
-### Smart Playback Experience
+### Settings
 
-The app supports resume behavior, episode progression, playback reporting, and a smoother continuity between browsing and watching. These details help the experience feel more like a cohesive media platform and less like a generic client.
+- Appearance settings
+- Playback settings
+- Discovery settings
+- Jellyfin settings
+- About page
+
+---
+
+## Built With
+
+### Frontend
+
+- React
+- TypeScript
+- Vite
+- Zustand
+
+### Desktop Framework
+
+- Tauri v2
+
+### Playback Engine
+
+- MPV
+
+### Media Server
+
+- Jellyfin
+
+### Anime Metadata
+
+- AniList
+- Jikan
+
+### Backend Services
+
+- Cloudflare Workers
+- Cloudflare KV
+
+---
+
+## Current Status
+
+### Version
+
+v0.1.1
+
+### Development Status
+
+ParallaxTV is actively developed and already provides a functional media experience.
+
+The project is currently Alpha software and may contain bugs or unfinished features.
+
+Expect:
+
+- Bugs
+- Missing features
+- UI refinements
+- Breaking changes between releases
 
 ---
 
@@ -89,6 +193,43 @@ Prebuilt Windows builds are available through GitHub Releases.
 - Latest release: https://github.com/parallaxtv/ParallaxTV/releases
 - Recommended: NSIS installer (.exe)
 - Alternative: MSI installer (.msi)
+
+---
+
+## Installation
+
+### Prerequisites
+
+- Jellyfin Server
+- Windows 10 or Windows 11
+- Node.js 20+
+- Rust
+- Tauri v2
+
+### Clone Repository
+
+```bash
+git clone https://github.com/parallaxtv/ParallaxTV.git
+cd ParallaxTV
+```
+
+### Install Dependencies
+
+```bash
+npm install
+```
+
+### Development
+
+```bash
+npm run tauri dev
+```
+
+### Production Build
+
+```bash
+npm run tauri build
+```
 
 ---
 
@@ -180,6 +321,12 @@ If you enjoy ParallaxTV and want to support future development, consider support
 https://ko-fi.com/iitzmyung
 
 Support helps fund development, testing, hardware, software licensing, hosting, and continued refinement of the experience.
+
+---
+
+## Created By
+
+ParallaxTV is created and maintained by iiTzMYUNG.
 
 ---
 
