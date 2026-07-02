@@ -1,217 +1,121 @@
 # ParallaxTV
 
 <p align="center">
-  <img src="src/assets/banner.png" alt="ParallaxTV Banner" />
-</p>
-
-<h3 align="center">
-A Premium Jellyfin Desktop Client
-</h3>
-
-<p align="center">
-Built with Tauri, React, TypeScript and MPV
+  <img src="src/assets/banner.png" alt="ParallaxTV banner" />
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/status-alpha-orange" />
+  <img src="https://img.shields.io/badge/version-v0.1.1-blue" />
   <img src="https://img.shields.io/badge/platform-windows-blue" />
-  <img src="https://img.shields.io/badge/jellyfin-supported-00A4DC" />
   <img src="https://img.shields.io/badge/tauri-v2-purple" />
   <img src="https://img.shields.io/badge/react-19-61DAFB" />
+  <img src="https://img.shields.io/badge/typescript-5-3178C6" />
   <img src="https://img.shields.io/badge/license-AGPL--3.0-green" />
 </p>
 
----
+<h3 align="center">A polished Jellyfin desktop experience built for modern media lovers.</h3>
 
-> [!WARNING]
-> ParallaxTV is currently in Alpha.
->
-> Features may change, bugs may exist, and breaking changes can occur between releases.
->
-> Feedback, bug reports, and feature suggestions are highly encouraged.
+<p align="center">
+  ParallaxTV brings Jellyfin to the desktop with native MPV playback, a refined interface, and a focus on discovery, anime, and comfort-first viewing.
+</p>
 
----
-
-## Overview
-
-ParallaxTV is a premium open-source Jellyfin desktop client focused on performance, beautiful design, and a modern streaming experience.
-
-Built with Tauri, React, TypeScript, and MPV, ParallaxTV combines the flexibility of Jellyfin with the responsiveness and polish expected from modern streaming applications.
-
-Unlike traditional browser-based clients, ParallaxTV uses native MPV playback to provide smooth playback of high bitrate media, anime, movies, and TV shows.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/parallaxtv/ParallaxTV/main/docs/images/hero.gif" alt="ParallaxTV hero preview" width="100%" />
+</p>
 
 ---
 
-## Features
+## What's New in v0.1.1
+
+Version 0.1.1 marks the moment ParallaxTV starts feeling like its own product rather than a collection of features. It brings a more cohesive UI, smoother navigation, and a stronger foundation for the desktop-first experience.
+
+### Highlights
+
+- A refreshed experience built around the new media-first layout
+- Better continuity across details, discovery, and playback flows
+- Improved polish for anime-focused browsing and recommendations
+- A stronger release identity for the project moving forward
+
+---
+
+## Why ParallaxTV?
+
+Most Jellyfin clients feel like browser experiences wrapped in a shell. ParallaxTV is different.
+
+It is designed for people who want Jellyfin to feel fast, immersive, and purpose-built for desktop use.
+
+| Experience | Traditional web clients | ParallaxTV |
+| --- | --- | --- |
+| Playback | Browser-dependent | Native MPV playback |
+| Interface | Generic | Tailored, modern, media-first |
+| Anime support | Basic | Deep metadata and discovery |
+| Desktop feel | Secondary | Primary design goal |
+| Focus | Compatibility | Polish and experience |
+
+---
+
+## Feature Highlights
 
 ### Native MPV Playback
 
-* Native MPV player integration
-* Hardware accelerated playback
-* HEVC / H.265 support
-* High bitrate support
-* Direct Play support
-* Server transcoding support
-* Audio track switching
-* Subtitle switching
-* Playback speed controls
-* Fullscreen support
+Enjoy smooth playback with native MPV integration, hardware acceleration, direct play support, subtitle controls, playback speed, and fullscreen-first behavior.
 
-### Smart TV Experience
+### Beautiful, Focused UI
 
-* Continue Watching
-* Up Next episodes
-* Watch History
-* Favorites
-* Resume playback
-* Episode progress tracking
-* Automatic playback reporting to Jellyfin
-* Smart playback resume
+ParallaxTV is built to feel calm and premium. The layout is designed to keep attention on the content rather than the chrome around it.
 
-### Anime Features
+### Discovery That Feels Personal
 
-* AniList integration
-* Anime discovery
-* Voice actor information
-* Anime recommendations
-* Trailer support
-* Anime cast pages
-* Enhanced anime metadata
+Continue watching, up next, recommendations, favorites, and discovery rows work together to make browsing feel intuitive.
 
-### Discovery System
+### Built for Anime and Media Fans
 
-* Trending content
-* Recommended content
-* Because You Watched
-* Genre-based discovery
-* Similar content suggestions
-* Dynamic recommendation rows
+From anime discovery to rich details pages and recommendation flows, ParallaxTV is tuned for viewers who want more than a basic library UI.
 
-### Advanced Playback Features
+---
 
-* Intro detection
-* Outro detection
-* Recap detection
-* Skip Intro
-* Skip Outro
-* Auto Skip
-* Next Episode countdown
-* Trickplay previews
-* Playback statistics overlay
-* Keyboard shortcuts overlay
+## Preview Gallery
 
-### Settings
+<p align="center">
+  <img src="https://raw.githubusercontent.com/parallaxtv/ParallaxTV/main/docs/images/hero.gif" alt="ParallaxTV interface preview" width="100%" />
+</p>
 
-* Appearance settings
-* Playback settings
-* Discovery settings
-* Jellyfin settings
-* About page
+<p align="center">
+  <img src="src/assets/banner.png" alt="ParallaxTV branding" width="70%" />
+</p>
 
 ---
 
 ## Download
 
-Prebuilt Windows installers are available through GitHub Releases.
+Prebuilt Windows builds are available through GitHub Releases.
 
-Latest release:
-
-https://github.com/parallaxtv/ParallaxTV/releases
-
-Recommended:
-
-* NSIS Installer (.exe)
-
-Alternative:
-
-* MSI Installer (.msi)
+- Latest release: https://github.com/parallaxtv/ParallaxTV/releases
+- Recommended: NSIS installer (.exe)
+- Alternative: MSI installer (.msi)
 
 ---
 
-## Built With
+## Building from Source
 
-### Frontend
+### Requirements
 
-* React
-* TypeScript
-* Vite
-* Zustand
+- Windows 10 or Windows 11
+- Node.js 20+
+- Rust
+- Tauri v2
+- A Jellyfin server
 
-### Desktop Framework
-
-* Tauri v2
-
-### Playback Engine
-
-* MPV
-
-### Media Server
-
-* Jellyfin
-
-### Anime Metadata
-
-* AniList
-* Jikan
-
-### Backend Services
-
-* Cloudflare Workers
-* Cloudflare KV
-
----
-
-## Current Status
-
-### Version
-
-v0.1.0-alpha
-
-### Development Status
-
-ParallaxTV is actively developed and already provides a functional media experience.
-
-The project is currently Alpha software and may contain bugs or unfinished features.
-
-Expect:
-
-* Bugs
-* Missing features
-* UI refinements
-* Breaking changes between releases
-
----
-
-## Installation
-
-### Prerequisites
-
-* Jellyfin Server
-* Windows 10 or Windows 11
-* Node.js 20+
-* Rust
-* Tauri v2
-
-### Clone Repository
+### Setup
 
 ```bash
 git clone https://github.com/parallaxtv/ParallaxTV.git
 cd ParallaxTV
-```
-
-### Install Dependencies
-
-```bash
 npm install
-```
-
-### Development
-
-```bash
 npm run tauri dev
 ```
 
-### Production Build
+For a production build:
 
 ```bash
 npm run tauri build
@@ -219,103 +123,53 @@ npm run tauri build
 
 ---
 
+## Project Philosophy
+
+ParallaxTV exists to make Jellyfin feel like a true desktop application again: fast, elegant, and intentional.
+
+It is built for users who want a more immersive experience without sacrificing the flexibility of self-hosted media.
+
+---
+
 ## Roadmap
 
 ### v0.1.x
 
-* [x] Native MPV Playback
-* [x] Continue Watching
-* [x] Up Next
-* [x] Favorites
-* [x] Discovery System
-* [x] Anime Integration
-* [x] Details Page Refactor
-* [x] Settings Page
-* [x] Intro Skip
-* [x] Outro Skip
-* [x] Next Episode Overlay
-* [x] Playback Statistics
+- [x] Native MPV playback
+- [x] Continue watching and up next
+- [x] Favorites and discovery flows
+- [x] Settings and playback improvements
+- [x] Intro/outro skipping and overlays
 
 ### v0.2.x
 
-* [ ] User Profiles
-* [ ] Kids Profiles
-* [ ] Anime Profiles
-* [ ] Viewing Statistics
-* [ ] Enhanced Search
-* [ ] Better Recommendation Engine
+- [ ] User profiles
+- [ ] Better search experience
+- [ ] Expanded viewing statistics
+- [ ] Improved recommendation engine
 
 ### Future
 
-* [ ] Download Manager
-* [ ] Offline Playback
-* [ ] Additional Discovery Providers
-* [ ] Sync Features
+- [ ] Download manager
+- [ ] Offline playback
+- [ ] More discovery providers
+- [ ] Sync and cross-device features
 
 ---
 
 ## Contributing
 
-Contributions are welcome.
+Contributions are welcome. If you have an idea, bug report, or improvement, open an issue or start a discussion.
 
-If you find a bug or have an idea for improving ParallaxTV:
-
-1. Open an Issue
-2. Describe the problem clearly
-3. Include reproduction steps
-4. Suggest improvements when possible
-
-Please check existing issues before creating duplicates.
-
----
-
-## Feedback
-
-We are actively looking for feedback from:
-
-* Jellyfin users
-* Anime fans
-* Self-hosting enthusiasts
-* Media server operators
-* Desktop application users
-
-Please use GitHub Issues and Discussions to share feedback, report bugs, and suggest features.
-
----
-
-## Community
-
-### GitHub
-
-https://github.com/parallaxtv/ParallaxTV
-
-### Discussions
-
-https://github.com/parallaxtv/ParallaxTV/discussions
+Please include as much context as possible so the project can be improved effectively.
 
 ---
 
 ## Support Development
 
-If you enjoy ParallaxTV and would like to support future development:
+If you enjoy ParallaxTV and want to support future development, consider supporting the project:
 
 https://ko-fi.com/iitzmyung
-
-Support helps fund development, testing hardware, software licenses, hosting costs, and future improvements.
-
----
-
-## Created By
-
-ParallaxTV is created and maintained by iiTzMYUNG.
-
----
-
-## Disclaimer
-
-ParallaxTV is an independent community project and is not affiliated with, endorsed by, or officially connected to the Jellyfin Project.
-
-Jellyfin is a trademark of the Jellyfin Project.
 
 ---
 
@@ -323,45 +177,16 @@ Jellyfin is a trademark of the Jellyfin Project.
 
 ParallaxTV is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 
-You are free to:
-
-* Use
-* Study
-* Modify
-* Distribute
-
-the source code under the terms of the AGPL-3.0 license.
-
 See the LICENSE file for full details.
 
 ---
 
 ## Trademark Notice
 
-The ParallaxTV name, logo, branding, artwork, visual identity, and related assets are property of the ParallaxTV project.
-
-The source code is licensed under AGPL-3.0.
-
-Forks and derivative works may not use the ParallaxTV name, logo, branding, or visual assets in a way that implies affiliation with or endorsement by the ParallaxTV project without explicit permission.
-
-Please choose a different name and branding for public forks and redistributions.
-
----
-
-## Acknowledgements
-
-Special thanks to:
-
-* Jellyfin Team
-* MPV Project
-* AniList
-* Jikan
-* Tauri Team
-* React Team
-* Open Source Community
+The ParallaxTV name, logo, branding, artwork, and related assets are the property of the ParallaxTV project. Forks and derivative works should use a different name and branding if they are distributed publicly.
 
 ---
 
 <p align="center">
-Made with ❤️ for the Jellyfin Community
+Made with ❤️ for the Jellyfin community.
 </p>
